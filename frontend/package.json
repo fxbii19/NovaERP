@@ -1,0 +1,119 @@
+{
+  "name": "frontend",
+  "version": "0.3.7",
+  "private": true,
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "prebuild": "node scripts/clean-next-runtime.cjs",
+    "dev": "next dev",
+    "dev:netzwerk": "next dev --webpack -H 0.0.0.0 -p 3000",
+    "demo": "node --env-file=.env --env-file=.env.local scripts/demo-testlauf.mjs",
+    "desktop": "node scripts/desktop-start.cjs",
+    "desktop:installer": "npm run build && electron-builder --win nsis --publish never",
+    "desktop:release": "npm run build && electron-builder --win nsis --publish always",
+    "build": "next build && node scripts/ensure-prerender-manifest.cjs",
+    "start": "next start",
+    "start:netzwerk": "next start -H 0.0.0.0 -p 3000",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "electron-updater": "^6.8.9",
+    "lucide-react": "^1.27.0",
+    "next": "16.2.11",
+    "nodemailer": "^9.0.3",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.22.0",
+    "prisma": "^7.9.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "electron": "^43.2.0",
+    "electron-builder": "^26.15.3",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.11",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "build": {
+    "appId": "de.nova.erp.demo",
+    "productName": "NOVA Next",
+    "artifactName": "NOVA-Next-Setup-${version}.${ext}",
+    "compression": "store",
+    "asar": false,
+    "npmRebuild": false,
+    "directories": {
+      "output": "desktop-release"
+    },
+    "files": [
+      "desktop/**/*",
+      "scripts/desktop-start.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".next-runtime",
+        "to": ".next-runtime"
+      },
+      {
+        "from": "public",
+        "to": "public"
+      },
+      {
+        "from": "next.config.ts",
+        "to": "next.config.ts"
+      },
+      {
+        "from": "desktop/demo-seed.db",
+        "to": "demo-seed.db"
+      },
+      {
+        "from": "desktop/runtime/node.exe",
+        "to": "node.exe"
+      },
+      {
+        "from": "desktop/assets/nova-app-icon.ico",
+        "to": "nova-app-icon.ico"
+      },
+      {
+        "from": "node_modules/better-sqlite3",
+        "to": ".next-runtime/node_modules/better-sqlite3-90e2652d1716b047"
+      },
+      {
+        "from": "node_modules/pg",
+        "to": ".next-runtime/node_modules/pg-587764f78a6c7a9c"
+      },
+      {
+        "from": ".next-runtime/node_modules/@prisma",
+        "to": ".next-runtime/node_modules/@prisma"
+      }
+    ],
+    "win": {
+      "icon": "desktop/assets/nova-app-icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "fxbii19",
+        "repo": "NovaERP",
+        "releaseType": "release"
+      }
+    ]
+  }
+}

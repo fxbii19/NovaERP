@@ -1,0 +1,84 @@
+.nova-page {
+  min-height: 100vh;
+  background-color: var(--nova-hintergrund);
+  color: var(--nova-text);
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+.nova-card {
+  border: 1px solid var(--nova-rand);
+  border-radius: 1rem;
+  background-color: var(--nova-flaeche);
+  color: var(--nova-text);
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    color 300ms ease;
+}
+
+.nova-card-hover:hover {
+  background-color: var(--nova-flaeche-hover);
+}
+
+.nova-muted {
+  color: var(--nova-text-schwaecher);
+}
+
+.nova-border {
+  border-color: var(--nova-rand);
+}
+
+.nova-primary {
+  background-color: var(--nova-akzent);
+  color: white;
+}
+
+.nova-primary:hover {
+  filter: brightness(1.1);
+}
+
+.nova-input {
+  width: 100%;
+  border: 1px solid var(--nova-rand);
+  border-radius: 0.75rem;
+  background-color: var(--nova-flaeche);
+  color: var(--nova-text);
+  padding: 0.75rem 1rem;
+  outline: none;
+}
+
+.nova-input::placeholder {
+  color: var(--nova-text-schwaecher);
+}
+
+.nova-input:focus {
+  border-color: var(--nova-akzent);
+  box-shadow: 0 0 0 3px color-mix(
+    in srgb,
+    var(--nova-akzent) 20%,
+    transparent
+  );
+}
+
+.nova-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--nova-text);
+}
+
+.nova-table thead {
+  background-color: var(--nova-flaeche-hover);
+}
+
+.nova-table th,
+.nova-table td {
+  border-bottom: 1px solid var(--nova-rand);
+  padding: 0.875rem 1rem;
+  text-align: left;
+}
+
+.nova-table tbody tr:hover {
+  background-color: var(--nova-flaeche-hover);
+}

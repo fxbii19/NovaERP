@@ -1,0 +1,842 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Artikel {
+  id             Int     @id @default(autoincrement())
+  artikelnummer  String  @unique
+  produktname    String
+  suchbegriff    String?
+  groesse        String?
+  variante       String?
+  bestand        Float   @default(0)
+  reserviert     Float   @default(0)
+  verfuegbar     Float   @default(0)
+  bestellt       Float   @default(0)
+  inAuftrag      Float   @default(0)
+  mindestbestand Float   @default(0)
+  verkaufspreis  Float   @default(0)
+
+  lagerplatz String?
+  einheit    String? @default("Stk")
+  gesperrt   Boolean @default(false)
+
+  lagerortverwaltung Boolean @default(true)
+  aktiv              Boolean @default(true)
+
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+
+  lagerbestaende           Lagerbestand[]
+  lagerbewegungen          Lagerbewegung[]
+  ladungstraegerPositionen LadungstraegerPosition[]
+  inventurPositionen       InventurPosition[]
+  pruefauftraege           Pruefauftrag[]
+  sperrbestaende           Sperrbestand[]
+  konfektionsauftraege     Konfektionsauftrag[]
+  logistikpositionen       Logistikposition[]
+  dispositionsvorschlaege  Dispositionsvorschlag[]
+
+  @@index([artikelnummer])
+  @@index([produktname])
+  @@index([lagerplatz])
+}
+
+model Lagerplatz {
+  id          Int     @id @default(autoincrement())
+  code        String  @unique
+  bezeichnung String
+  bereich     String
+  typ         String  @default("REGAL")
+  aktiv       Boolean @default(true)
+
+  bestaende            Lagerbestand[]
+  eingehendeBewegungen Lagerbewegung[]      @relation("BewegungNach")
+  ausgehendeBewegungen Lagerbewegung[]      @relation("BewegungVon")
+  ladungstraeger       Ladungstraeger[]
+  inventurPositionen   InventurPosition[]
+  pruefauftraege       Pruefauftrag[]
+  sperrbestaende       Sperrbestand[]
+  konfektionVon        Konfektionsauftrag[] @relation("KonfektionVon")
+  konfektionNach       Konfektionsauftrag[] @relation("KonfektionNach")
+
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+
+  @@index([bereich])
+}
+
+model Lagerbestand {
+  id           Int   @id @default(autoincrement())
+  artikelId    Int
+  lagerplatzId Int
+  menge        Float @default(0)
+
+  artikel    Artikel    @relation(fields: [artikelId], references: [id], onDelete: Cascade)
+  lagerplatz Lagerplatz @relation(fields: [lagerplatzId], references: [id], onDelete: Cascade)
+
+  aktualisiertAm DateTime @updatedAt
+
+  @@unique([artikelId, lagerplatzId])
+  @@index([lagerplatzId])
+}
+
+model Lagerbewegung {
+  id                 Int       @id @default(autoincrement())
+  typ                String
+  status             String    @default("ERFASST")
+  artikelId          Int
+  menge              Float
+  vonLagerplatzId    Int?
+  nachLagerplatzId   Int?
+  lieferscheinnummer String?
+  ladungstraegerCode String?
+  notiz              String?
+  erfasstVon         String?
+  bestaetigtVon      String?
+  erfasstAm          DateTime  @default(now())
+  bestaetigtAm       DateTime?
+
+  artikel        Artikel     @relation(fields: [artikelId], references: [id])
+  vonLagerplatz  Lagerplatz? @relation("BewegungVon", fields: [vonLagerplatzId], references: [id])
+  nachLagerplatz Lagerplatz? @relation("BewegungNach", fields: [nachLagerplatzId], references: [id])
+
+  @@index([status])
+  @@index([typ])
+  @@index([lieferscheinnummer])
+}
+
+model Ladungstraeger {
+  id           Int     @id @default(autoincrement())
+  barcode      String  @unique
+  bezeichnung  String
+  lagerplatzId Int?
+  aktiv        Boolean @default(true)
+
+  lagerplatz Lagerplatz?              @relation(fields: [lagerplatzId], references: [id])
+  positionen LadungstraegerPosition[]
+
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+}
+
+model LadungstraegerPosition {
+  id               Int   @id @default(autoincrement())
+  ladungstraegerId Int
+  artikelId        Int
+  menge            Float @default(0)
+
+  ladungstraeger Ladungstraeger @relation(fields: [ladungstraegerId], references: [id], onDelete: Cascade)
+  artikel        Artikel        @relation(fields: [artikelId], references: [id])
+
+  @@unique([ladungstraegerId, artikelId])
+}
+
+model InventurPosition {
+  id           Int       @id @default(autoincrement())
+  lagerplatzId Int
+  artikelId    Int
+  sollMenge    Float
+  istMenge     Float
+  differenz    Float
+  status       String    @default("OFFEN")
+  gezaehltVon  String?
+  gebuchtVon   String?
+  gezaehltAm   DateTime  @default(now())
+  gebuchtAm    DateTime?
+
+  lagerplatz Lagerplatz @relation(fields: [lagerplatzId], references: [id])
+  artikel    Artikel    @relation(fields: [artikelId], references: [id])
+
+  @@index([status])
+  @@index([lagerplatzId])
+}
+
+model Pruefauftrag {
+  id              Int       @id @default(autoincrement())
+  pruefnummer     String    @unique
+  artikelId       Int
+  lagerplatzId    Int?
+  typ             String    @default("EINGANGSPRUEFUNG")
+  status          String    @default("OFFEN")
+  prioritaet      String    @default("NORMAL")
+  pruefmenge      Float
+  auftraggeber    String?
+  zugewiesenAn    String?
+  notiz           String?
+  erstelltAm      DateTime  @default(now())
+  faelligAm       DateTime?
+  abgeschlossenAm DateTime?
+
+  artikel    Artikel             @relation(fields: [artikelId], references: [id])
+  lagerplatz Lagerplatz?         @relation(fields: [lagerplatzId], references: [id])
+  pruefung   Qualitaetspruefung?
+
+  @@index([status])
+  @@index([typ])
+}
+
+model Qualitaetspruefung {
+  id             Int      @id @default(autoincrement())
+  pruefauftragId Int      @unique
+  ergebnis       String
+  gutMenge       Float
+  fehlerMenge    Float
+  fehlerart      String?
+  schweregrad    String?
+  bemerkung      String?
+  geprueftVon    String?
+  geprueftAm     DateTime @default(now())
+
+  pruefauftrag   Pruefauftrag         @relation(fields: [pruefauftragId], references: [id], onDelete: Cascade)
+  freigaben      Qualitaetsfreigabe[]
+  sperrbestaende Sperrbestand[]
+}
+
+model Qualitaetsfreigabe {
+  id             Int      @id @default(autoincrement())
+  pruefungId     Int
+  entscheidung   String
+  begruendung    String?
+  entschiedenVon String?
+  entschiedenAm  DateTime @default(now())
+
+  pruefung Qualitaetspruefung @relation(fields: [pruefungId], references: [id], onDelete: Cascade)
+
+  @@index([entscheidung])
+}
+
+model Sperrbestand {
+  id             Int       @id @default(autoincrement())
+  artikelId      Int
+  lagerplatzId   Int?
+  pruefungId     Int?
+  menge          Float
+  grund          String
+  status         String    @default("GESPERRT")
+  gesperrtVon    String?
+  freigegebenVon String?
+  gesperrtAm     DateTime  @default(now())
+  freigegebenAm  DateTime?
+
+  artikel    Artikel             @relation(fields: [artikelId], references: [id])
+  lagerplatz Lagerplatz?         @relation(fields: [lagerplatzId], references: [id])
+  pruefung   Qualitaetspruefung? @relation(fields: [pruefungId], references: [id])
+
+  @@index([status])
+}
+
+model Konfektionsauftrag {
+  id               Int       @id @default(autoincrement())
+  auftragsnummer   String    @unique
+  artikelId        Int
+  vonLagerplatzId  Int?
+  nachLagerplatzId Int?
+  status           String    @default("OFFEN")
+  arbeitsschritt   String
+  sollMenge        Float
+  istMenge         Float     @default(0)
+  ausschussMenge   Float     @default(0)
+  bearbeiter       String?
+  notiz            String?
+  erstelltAm       DateTime  @default(now())
+  gestartetAm      DateTime?
+  abgeschlossenAm  DateTime?
+
+  artikel        Artikel     @relation(fields: [artikelId], references: [id])
+  vonLagerplatz  Lagerplatz? @relation("KonfektionVon", fields: [vonLagerplatzId], references: [id])
+  nachLagerplatz Lagerplatz? @relation("KonfektionNach", fields: [nachLagerplatzId], references: [id])
+
+  @@index([status])
+}
+
+model Logistikauftrag {
+  id             Int       @id @default(autoincrement())
+  auftragsnummer String    @unique
+  kunde          String
+  kundenreferenz String?
+  lieferadresse  String?
+  status         String    @default("OFFEN")
+  prioritaet     String    @default("NORMAL")
+  liefertermin   DateTime?
+  notiz          String?
+  erstelltVon    String?
+  erstelltAm     DateTime  @default(now())
+  aktualisiertAm DateTime  @updatedAt
+
+  positionen       Logistikposition[]
+  kommissionierung Kommissionierung?
+  ladungsauftraege Ladungsauftrag[]
+  versand          Versand?
+
+  @@index([status])
+  @@index([kunde])
+}
+
+model Logistikposition {
+  id                   Int   @id @default(autoincrement())
+  auftragId            Int
+  artikelId            Int
+  menge                Float
+  einzelpreis          Float @default(0)
+  kommissionierteMenge Float @default(0)
+
+  auftrag Logistikauftrag @relation(fields: [auftragId], references: [id], onDelete: Cascade)
+  artikel Artikel         @relation(fields: [artikelId], references: [id])
+
+  @@unique([auftragId, artikelId])
+}
+
+model Kommissionierung {
+  id                  Int       @id @default(autoincrement())
+  kommissioniernummer String    @unique
+  auftragId           Int       @unique
+  status              String    @default("OFFEN")
+  bearbeiter          String?
+  gestartetAm         DateTime?
+  abgeschlossenAm     DateTime?
+  notiz               String?
+
+  auftrag Logistikauftrag @relation(fields: [auftragId], references: [id], onDelete: Cascade)
+}
+
+model Ladung {
+  id             Int       @id @default(autoincrement())
+  ladungsnummer  String    @unique
+  status         String    @default("GEPLANT")
+  spediteur      String?
+  kennzeichen    String?
+  rampe          String?
+  abfahrt        DateTime?
+  ziel           String?
+  erstelltVon    String?
+  erstelltAm     DateTime  @default(now())
+  aktualisiertAm DateTime  @updatedAt
+
+  auftraege Ladungsauftrag[]
+  sendungen Versand[]
+
+  @@index([status])
+}
+
+model Ladungsauftrag {
+  id        Int @id @default(autoincrement())
+  ladungId  Int
+  auftragId Int
+
+  ladung  Ladung          @relation(fields: [ladungId], references: [id], onDelete: Cascade)
+  auftrag Logistikauftrag @relation(fields: [auftragId], references: [id], onDelete: Cascade)
+
+  @@unique([ladungId, auftragId])
+}
+
+model Versand {
+  id             Int       @id @default(autoincrement())
+  versandnummer  String    @unique
+  auftragId      Int       @unique
+  ladungId       Int?
+  status         String    @default("BEREIT")
+  versandart     String?
+  trackingnummer String?
+  warenwert      Float     @default(0)
+  bezahlt        Boolean   @default(false)
+  bezahltVon     String?
+  bezahltAm      DateTime?
+  versendetVon   String?
+  versendetAm    DateTime?
+  erstelltAm     DateTime  @default(now())
+
+  auftrag      Logistikauftrag @relation(fields: [auftragId], references: [id])
+  ladung       Ladung?         @relation(fields: [ladungId], references: [id])
+  desadv       Desadv?
+  lieferschein Lieferschein?
+
+  @@index([status])
+}
+
+model Desadv {
+  id           Int       @id @default(autoincrement())
+  desadvnummer String    @unique
+  versandId    Int       @unique
+  status       String    @default("ERSTELLT")
+  empfaenger   String?
+  gesendetVon  String?
+  erstelltAm   DateTime  @default(now())
+  gesendetAm   DateTime?
+
+  versand Versand @relation(fields: [versandId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+model Lieferschein {
+  id                 Int      @id @default(autoincrement())
+  lieferscheinnummer String   @unique
+  versandId          Int      @unique
+  status             String   @default("ERSTELLT")
+  bemerkung          String?
+  erstelltVon        String?
+  erstelltAm         DateTime @default(now())
+
+  versand Versand @relation(fields: [versandId], references: [id], onDelete: Cascade)
+}
+
+model Rollenprofil {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique
+  name           String
+  beschreibung   String?
+  rechteJson     String
+  systemrolle    Boolean  @default(false)
+  aktiv          Boolean  @default(true)
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+
+  benutzer Benutzer[]
+}
+
+model Benutzer {
+  id                 Int       @id @default(autoincrement())
+  personalnummer     String    @unique
+  vorname            String
+  nachname           String
+  passwortHash       String
+  abteilung          String
+  rollenprofilCode   String
+  aktiv              Boolean   @default(true)
+  letzteAnmeldungAm  DateTime?
+  letzteMotivationAm DateTime?
+  erstelltAm         DateTime  @default(now())
+  aktualisiertAm     DateTime  @updatedAt
+
+  rollenprofil       Rollenprofil              @relation(fields: [rollenprofilCode], references: [code])
+  sitzungen          BenutzerSitzung[]
+  aufgaben           MitarbeiterAufgabe[]
+  schichten          Mitarbeiterschicht[]
+  arbeitsauftraege   DigitalerArbeitsauftrag[]
+  benachrichtigungen InterneBenachrichtigung[]
+
+  @@index([nachname])
+  @@index([rollenprofilCode])
+  @@index([aktiv])
+}
+
+model MitarbeiterAufgabe {
+  id             Int       @id @default(autoincrement())
+  titel          String
+  beschreibung   String?
+  status         String    @default("OFFEN")
+  prioritaet     String    @default("NORMAL")
+  faelligAm      DateTime?
+  benutzerId     Int
+  erstelltVon    String?
+  erstelltAm     DateTime  @default(now())
+  aktualisiertAm DateTime  @updatedAt
+
+  benutzer Benutzer @relation(fields: [benutzerId], references: [id], onDelete: Cascade)
+
+  @@index([benutzerId, status])
+  @@index([faelligAm])
+}
+
+model Mitarbeiterschicht {
+  id             Int      @id @default(autoincrement())
+  benutzerId     Int
+  datum          DateTime
+  startzeit      String
+  endzeit        String
+  bereich        String
+  status         String   @default("GEPLANT")
+  notiz          String?
+  erstelltVon    String?
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+
+  benutzer Benutzer @relation(fields: [benutzerId], references: [id], onDelete: Cascade)
+
+  @@index([benutzerId, datum])
+  @@index([datum])
+}
+
+model DigitalerArbeitsauftrag {
+  id              Int       @id @default(autoincrement())
+  nummer          String    @unique
+  titel           String
+  beschreibung    String?
+  status          String    @default("OFFEN")
+  prioritaet      String    @default("NORMAL")
+  faelligAm       DateTime?
+  benutzerId      Int
+  erstelltVon     String?
+  begonnenAm      DateTime?
+  abgeschlossenAm DateTime?
+  erstelltAm      DateTime  @default(now())
+  aktualisiertAm  DateTime  @updatedAt
+
+  benutzer Benutzer @relation(fields: [benutzerId], references: [id], onDelete: Cascade)
+
+  @@index([benutzerId, status])
+  @@index([faelligAm])
+}
+
+model InterneBenachrichtigung {
+  id          Int       @id @default(autoincrement())
+  titel       String
+  nachricht   String
+  typ         String    @default("INFO")
+  gelesen     Boolean   @default(false)
+  benutzerId  Int
+  erstelltVon String?
+  gelesenAm   DateTime?
+  erstelltAm  DateTime  @default(now())
+
+  benutzer Benutzer @relation(fields: [benutzerId], references: [id], onDelete: Cascade)
+
+  @@index([benutzerId, gelesen])
+  @@index([erstelltAm])
+}
+
+model OrganisationTermin {
+  id             Int      @id @default(autoincrement())
+  titel          String
+  beschreibung   String?
+  typ            String   @default("TERMIN")
+  sichtbarkeit   String   @default("PERSOENLICH")
+  startAm        DateTime
+  endeAm         DateTime
+  ort            String?
+  organisiertVon String
+  organisatorId  Int
+  teilnehmerJson String   @default("[]")
+  status         String   @default("GEPLANT")
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+
+  @@index([startAm, endeAm])
+  @@index([organisatorId])
+  @@index([sichtbarkeit])
+}
+
+model OrganisationRessource {
+  id             Int                      @id @default(autoincrement())
+  name           String                   @unique
+  kategorie      String
+  standort       String?
+  beschreibung   String?
+  aktiv          Boolean                  @default(true)
+  erstelltAm     DateTime                 @default(now())
+  aktualisiertAm DateTime                 @updatedAt
+  reservierungen RessourcenReservierung[]
+
+  @@index([kategorie])
+  @@index([aktiv])
+}
+
+model RessourcenReservierung {
+  id          Int                   @id @default(autoincrement())
+  ressourceId Int
+  titel       String
+  startAm     DateTime
+  endeAm      DateTime
+  gebuchtVon  String
+  benutzerId  Int
+  status      String                @default("RESERVIERT")
+  notiz       String?
+  erstelltAm  DateTime              @default(now())
+  ressource   OrganisationRessource @relation(fields: [ressourceId], references: [id], onDelete: Cascade)
+
+  @@index([ressourceId, startAm, endeAm])
+  @@index([benutzerId])
+}
+
+model Hintergrundauftrag {
+  id              Int       @id @default(autoincrement())
+  typ             String
+  payloadJson     String    @default("{}")
+  status          String    @default("WARTEND")
+  prioritaet      Int       @default(100)
+  versuche        Int       @default(0)
+  maxVersuche     Int       @default(3)
+  ausfuehrenAb    DateTime  @default(now())
+  gestartetAm     DateTime?
+  abgeschlossenAm DateTime?
+  fehler          String?
+  erstelltAm      DateTime  @default(now())
+  aktualisiertAm  DateTime  @updatedAt
+
+  @@index([status, ausfuehrenAb, prioritaet])
+  @@index([typ])
+  @@index([erstelltAm])
+}
+
+model NovaMail {
+  id             Int       @id @default(autoincrement())
+  nachrichtenId  String    @unique
+  absender       String
+  empfaenger     String
+  cc             String?
+  betreff        String
+  inhalt         String
+  ordner         String    @default("POSTEINGANG")
+  gelesen        Boolean   @default(false)
+  wichtig        Boolean   @default(false)
+  anhangJson     String    @default("[]")
+  bezugTyp       String?
+  bezugId        String?
+  benutzerId     Int
+  gesendetAm     DateTime?
+  empfangenAm    DateTime?
+  erstelltAm     DateTime  @default(now())
+  aktualisiertAm DateTime  @updatedAt
+
+  @@index([benutzerId, ordner])
+  @@index([empfangenAm])
+  @@index([bezugTyp, bezugId])
+}
+
+model KommunikationsKanal {
+  id             Int                       @id @default(autoincrement())
+  name           String
+  typ            String                    @default("TEAM")
+  beschreibung   String?
+  abteilung      String?
+  erstelltVonId  Int
+  mitgliederJson String                    @default("[]")
+  aktiv          Boolean                   @default(true)
+  erstelltAm     DateTime                  @default(now())
+  aktualisiertAm DateTime                  @updatedAt
+  nachrichten    KommunikationsNachricht[]
+
+  @@index([typ, aktiv])
+  @@index([abteilung])
+}
+
+model KommunikationsNachricht {
+  id             Int                 @id @default(autoincrement())
+  kanalId        Int
+  absenderId     Int
+  absender       String
+  inhalt         String
+  anhangJson     String              @default("[]")
+  bearbeitet     Boolean             @default(false)
+  erstelltAm     DateTime            @default(now())
+  aktualisiertAm DateTime            @updatedAt
+  kanal          KommunikationsKanal @relation(fields: [kanalId], references: [id], onDelete: Cascade)
+
+  @@index([kanalId, erstelltAm])
+  @@index([absenderId])
+}
+
+model BenutzerSitzung {
+  id              String   @id @default(uuid())
+  tokenHash       String   @unique
+  benutzerId      Int
+  laeuftAbAm      DateTime
+  erstelltAm      DateTime @default(now())
+  letzteNutzungAm DateTime @default(now())
+
+  benutzer Benutzer @relation(fields: [benutzerId], references: [id], onDelete: Cascade)
+
+  @@index([benutzerId])
+  @@index([laeuftAbAm])
+}
+
+model Systemeinstellung {
+  id              Int      @id @default(autoincrement())
+  schluessel      String   @unique
+  wert            String
+  typ             String   @default("TEXT")
+  kategorie       String
+  bezeichnung     String
+  beschreibung    String?
+  aktualisiertVon String?
+  aktualisiertAm  DateTime @updatedAt
+
+  @@index([kategorie])
+}
+
+model Systemprotokoll {
+  id         Int      @id @default(autoincrement())
+  modul      String
+  aktion     String
+  details    String?
+  stufe      String   @default("INFO")
+  benutzer   String?
+  objektTyp  String?
+  objektId   String?
+  alterWert  String?
+  neuerWert String?
+  grund      String?
+  erstelltAm DateTime @default(now())
+
+  @@index([modul])
+  @@index([stufe])
+  @@index([erstelltAm])
+}
+
+model Bestellung {
+  id                 Int     @id @default(autoincrement())
+  bestellnummer      String  @unique
+  lieferscheinnummer String? @unique
+  lieferant          String
+  status             String  @default("Offen")
+  gesamtpositionen   Int     @default(0)
+
+  erstelltAm     DateTime @default(now())
+  aktualisiertAm DateTime @updatedAt
+}
+
+model Telefonat {
+  id             Int       @id @default(autoincrement())
+  anrufer        String
+  firma          String?
+  telefonnummer  String?
+  betreff        String
+  notiz          String?
+  sachbearbeiter String?
+  status         String    @default("OFFEN")
+  angenommenVon  String
+  angenommenAm   DateTime  @default(now())
+  erledigtAm     DateTime?
+
+  @@index([status])
+  @@index([angenommenAm])
+}
+
+model Abwesenheit {
+  id          Int      @id @default(autoincrement())
+  benutzerId  Int?
+  mitarbeiter String
+  art         String
+  von         DateTime
+  bis         DateTime
+  status      String   @default("EINGETRAGEN")
+  notiz       String?
+  erstelltVon String
+  erstelltAm  DateTime @default(now())
+
+  @@index([von, bis])
+  @@index([benutzerId])
+}
+
+model Zeitbuchung {
+  id          Int      @id @default(autoincrement())
+  benutzerId  Int
+  mitarbeiter String
+  typ         String
+  zeitpunkt   DateTime @default(now())
+  notiz       String?
+
+  @@index([benutzerId, zeitpunkt])
+}
+
+model Kunde {
+  id              Int        @id @default(autoincrement())
+  kundennummer    String     @unique
+  firmenname      String
+  ansprechpartner String?
+  email           String?
+  telefon         String?
+  ort             String?
+  aktiv           Boolean    @default(true)
+  erstelltAm      DateTime   @default(now())
+  aktualisiertAm  DateTime   @updatedAt
+  angebote        Angebot[]
+  rechnungen      Rechnung[]
+
+  @@index([firmenname])
+}
+
+model Angebot {
+  id             Int       @id @default(autoincrement())
+  angebotsnummer String    @unique
+  kundeId        Int
+  titel          String
+  status         String    @default("ENTWURF")
+  nettowert      Float     @default(0)
+  gueltigBis     DateTime?
+  erstelltVon    String?
+  erstelltAm     DateTime  @default(now())
+  aktualisiertAm DateTime  @updatedAt
+  kunde          Kunde     @relation(fields: [kundeId], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@index([kundeId])
+}
+
+model Dispositionsvorschlag {
+  id                  Int       @id @default(autoincrement())
+  artikelId           Int
+  vorgeschlageneMenge Float
+  begruendung         String
+  status              String    @default("NEU")
+  erstelltVon         String?
+  erstelltAm          DateTime  @default(now())
+  bearbeitetAm        DateTime?
+  artikel             Artikel   @relation(fields: [artikelId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([artikelId])
+}
+
+model Rechnung {
+  id              Int       @id @default(autoincrement())
+  rechnungsnummer String    @unique
+  kundeId         Int?
+  kundeName       String
+  betreff         String
+  nettowert       Float
+  steuersatz      Float     @default(19)
+  bruttowert      Float
+  status          String    @default("OFFEN")
+  rechnungsdatum  DateTime  @default(now())
+  faelligAm       DateTime
+  bezahltAm       DateTime?
+  erstelltVon     String?
+  erstelltAm      DateTime  @default(now())
+  kunde           Kunde?    @relation(fields: [kundeId], references: [id], onDelete: SetNull)
+  zahlungen       Zahlung[]
+
+  @@index([status])
+  @@index([faelligAm])
+}
+
+model Zahlung {
+  id          Int      @id @default(autoincrement())
+  rechnungId  Int
+  betrag      Float
+  zahlungsart String   @default("Überweisung")
+  referenz    String?
+  gebuchtVon  String?
+  gebuchtAm   DateTime @default(now())
+  rechnung    Rechnung @relation(fields: [rechnungId], references: [id], onDelete: Cascade)
+
+  @@index([rechnungId])
+  @@index([gebuchtAm])
+}
+
+model CadDokument {
+  id              Int       @id @default(autoincrement())
+  dokumentnummer  String    @unique
+  artikelId       Int?
+  artikelnummer   String?
+  bezeichnung     String
+  dokumenttyp     String    @default("ZEICHNUNG")
+  version         String    @default("A")
+  status          String    @default("ENTWURF")
+  dateiname       String?
+  aenderungsnotiz String?
+  bearbeiter      String?
+  freigegebenVon  String?
+  freigegebenAm   DateTime?
+  erstelltAm      DateTime  @default(now())
+  aktualisiertAm  DateTime  @updatedAt
+
+  @@index([artikelId])
+  @@index([status])
+}

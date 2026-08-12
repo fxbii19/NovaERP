@@ -1,0 +1,351 @@
+@import "tailwindcss" source(none);
+
+@source "../app";
+@source "../components";
+@source "../hooks";
+@source "../lib";
+
+@import "../styles/nova-design-system.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --nova-hintergrund: #020617;
+  --nova-flaeche: #0f172a;
+  --nova-flaeche-hover: #1e293b;
+  --nova-rand: #334155;
+  --nova-text: #f8fafc;
+  --nova-text-schwaecher: #94a3b8;
+
+  --nova-akzent: #6366f1;
+  --nova-akzent-zweitfarbe: #9333ea;
+  --nova-akzent-hover: #4f46e5;
+  --nova-akzent-verlauf: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #4338ca 0%, #6d28d9 55%, #7e22ce 100%);
+  --nova-akzent-transparent: rgb(99 102 241 / 0.14);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html[data-theme="light"] {
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+
+  --nova-hintergrund: #f1f5f9;
+  --nova-flaeche: #ffffff;
+  --nova-flaeche-hover: #e2e8f0;
+  --nova-rand: #cbd5e1;
+  --nova-text: #0f172a;
+  --nova-text-schwaecher: #64748b;
+  --nova-hover: var(--nova-hover-light);
+}
+
+html[data-theme="dark"] {
+  --background: #020617;
+  --foreground: #f8fafc;
+
+  --nova-hintergrund: #020617;
+  --nova-flaeche: #0f172a;
+  --nova-flaeche-hover: #1e293b;
+  --nova-rand: #334155;
+  --nova-text: #f8fafc;
+  --nova-text-schwaecher: #94a3b8;
+  --nova-hover: var(--nova-hover-dark);
+}
+
+html[data-akzent="cyan"] {
+  --nova-akzent: #017374;
+  --nova-akzent-zweitfarbe: #c2ece2;
+  --nova-akzent-hover: #005b5c;
+  --nova-akzent-verlauf: linear-gradient(135deg, #017374, #c2ece2);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #005b5c, #9fd8ca);
+  --nova-akzent-transparent: rgb(1 115 116 / 0.16);
+  --nova-hover-light: #dff5ef;
+  --nova-hover-dark: #12494a;
+}
+
+html[data-akzent="pearl-stone"] { --nova-akzent: #f5f6f7; --nova-akzent-zweitfarbe: #2f2f33; --nova-akzent-hover: #d9dbde; --nova-akzent-verlauf: linear-gradient(135deg, #f5f6f7, #2f2f33); --nova-akzent-verlauf-hover: linear-gradient(135deg, #d9dbde, #1f1f22); --nova-akzent-transparent: rgb(47 47 51 / 0.16); --nova-hover-light: #eceef0; --nova-hover-dark: #35363a; }
+html[data-akzent="laser-teal"] { --nova-akzent: #2ef2e2; --nova-akzent-zweitfarbe: #0f2f2f; --nova-akzent-hover: #18cfc1; --nova-akzent-verlauf: linear-gradient(135deg, #2ef2e2, #0f2f2f); --nova-akzent-verlauf-hover: linear-gradient(135deg, #18cfc1, #081f1f); --nova-akzent-transparent: rgb(46 242 226 / 0.16); --nova-hover-light: #d5fbf8; --nova-hover-dark: #164b48; }
+html[data-akzent="lime-green"] { --nova-akzent: #a4f000; --nova-akzent-zweitfarbe: #003f3a; --nova-akzent-hover: #84c400; --nova-akzent-verlauf: linear-gradient(135deg, #a4f000, #003f3a); --nova-akzent-verlauf-hover: linear-gradient(135deg, #84c400, #002b28); --nova-akzent-transparent: rgb(164 240 0 / 0.16); --nova-hover-light: #efffc9; --nova-hover-dark: #294b20; }
+html[data-akzent="sunset-blue"] { --nova-akzent: #ff9e6d; --nova-akzent-zweitfarbe: #1a2238; --nova-akzent-hover: #f47f45; --nova-akzent-verlauf: linear-gradient(135deg, #ff9e6d, #1a2238); --nova-akzent-verlauf-hover: linear-gradient(135deg, #f47f45, #101728); --nova-akzent-transparent: rgb(255 158 109 / 0.16); --nova-hover-light: #ffe8dc; --nova-hover-dark: #55342f; }
+html[data-akzent="kiwi-night"] { --nova-akzent: #222222; --nova-akzent-zweitfarbe: #89e900; --nova-akzent-hover: #111111; --nova-akzent-verlauf: linear-gradient(135deg, #222222, #89e900); --nova-akzent-verlauf-hover: linear-gradient(135deg, #111111, #70c000); --nova-akzent-transparent: rgb(137 233 0 / 0.16); --nova-hover-light: #edffd4; --nova-hover-dark: #30451b; }
+html[data-akzent="ghost-persian"] { --nova-akzent: #f7f7ff; --nova-akzent-zweitfarbe: #27187e; --nova-akzent-hover: #dedff5; --nova-akzent-verlauf: linear-gradient(135deg, #f7f7ff, #27187e); --nova-akzent-verlauf-hover: linear-gradient(135deg, #dedff5, #1c105f); --nova-akzent-transparent: rgb(39 24 126 / 0.16); --nova-hover-light: #eeeefe; --nova-hover-dark: #31265e; }
+html[data-akzent="cyprus-sand"] { --nova-akzent: #004643; --nova-akzent-zweitfarbe: #f0ede5; --nova-akzent-hover: #003532; --nova-akzent-verlauf: linear-gradient(135deg, #004643, #f0ede5); --nova-akzent-verlauf-hover: linear-gradient(135deg, #003532, #d9d4c8); --nova-akzent-transparent: rgb(0 70 67 / 0.16); --nova-hover-light: #e0efec; --nova-hover-dark: #164542; }
+html[data-akzent="plum-milk"] { --nova-akzent: #381932; --nova-akzent-zweitfarbe: #fff3e6; --nova-akzent-hover: #291124; --nova-akzent-verlauf: linear-gradient(135deg, #381932, #fff3e6); --nova-akzent-verlauf-hover: linear-gradient(135deg, #291124, #ead8c6); --nova-akzent-transparent: rgb(56 25 50 / 0.16); --nova-hover-light: #f9e9f4; --nova-hover-dark: #4b2942; }
+html[data-akzent="soft-olive"] { --nova-akzent: #acc8a2; --nova-akzent-zweitfarbe: #1a2517; --nova-akzent-hover: #8eae83; --nova-akzent-verlauf: linear-gradient(135deg, #acc8a2, #1a2517); --nova-akzent-verlauf-hover: linear-gradient(135deg, #8eae83, #10180e); --nova-akzent-transparent: rgb(172 200 162 / 0.18); --nova-hover-light: #e8f1e4; --nova-hover-dark: #34452f; }
+html[data-akzent="pumpkin"] { --nova-akzent: #fd802e; --nova-akzent-zweitfarbe: #233d4c; --nova-akzent-hover: #df6415; --nova-akzent-verlauf: linear-gradient(135deg, #fd802e, #233d4c); --nova-akzent-verlauf-hover: linear-gradient(135deg, #df6415, #172b36); --nova-akzent-transparent: rgb(253 128 46 / 0.16); --nova-hover-light: #ffe3d0; --nova-hover-dark: #53352a; }
+html[data-akzent="sky"] { --nova-akzent: #2872a1; --nova-akzent-zweitfarbe: #cbdee9; --nova-akzent-hover: #1f5b81; --nova-akzent-verlauf: linear-gradient(135deg, #2872a1, #cbdee9); --nova-akzent-verlauf-hover: linear-gradient(135deg, #1f5b81, #acc9da); --nova-akzent-transparent: rgb(40 114 161 / 0.16); --nova-hover-light: #e1eff7; --nova-hover-dark: #24465e; }
+html[data-akzent="peace-mist"] { --nova-akzent: #ffd2c2; --nova-akzent-zweitfarbe: #789a99; --nova-akzent-hover: #efb6a2; --nova-akzent-verlauf: linear-gradient(135deg, #ffd2c2, #789a99); --nova-akzent-verlauf-hover: linear-gradient(135deg, #efb6a2, #607f7e); --nova-akzent-transparent: rgb(120 154 153 / 0.18); --nova-hover-light: #fff0eb; --nova-hover-dark: #4b4c49; }
+html[data-akzent="chill-pink"] { --nova-akzent: #fd1843; --nova-akzent-zweitfarbe: #fff9fa; --nova-akzent-hover: #db0b33; --nova-akzent-verlauf: linear-gradient(135deg, #fd1843, #fff9fa); --nova-akzent-verlauf-hover: linear-gradient(135deg, #db0b33, #f1e4e7); --nova-akzent-transparent: rgb(253 24 67 / 0.16); --nova-hover-light: #ffe1e7; --nova-hover-dark: #5b2330; }
+
+html[data-akzent="blue"] {
+  --nova-akzent: #3b82f6;
+  --nova-akzent-zweitfarbe: #6366f1;
+  --nova-akzent-hover: #2563eb;
+  --nova-akzent-verlauf: linear-gradient(135deg, #3b82f6, #6366f1);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #2563eb, #4f46e5);
+  --nova-akzent-transparent: rgb(59 130 246 / 0.16);
+  --nova-hover-light: #bfdbfe;
+  --nova-hover-dark: #1e3a8a;
+}
+
+html[data-akzent="purple"] {
+  --nova-akzent: #6366f1;
+  --nova-akzent-zweitfarbe: #9333ea;
+  --nova-akzent-hover: #4f46e5;
+  --nova-akzent-verlauf: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #4338ca 0%, #6d28d9 55%, #7e22ce 100%);
+  --nova-akzent-transparent: rgb(99 102 241 / 0.14);
+  --nova-hover-light: #d8b4fe;
+  --nova-hover-dark: #581c87;
+}
+
+html[data-akzent="emerald"] {
+  --nova-akzent: #10b981;
+  --nova-akzent-zweitfarbe: #06b6d4;
+  --nova-akzent-hover: #059669;
+  --nova-akzent-verlauf: linear-gradient(135deg, #10b981, #06b6d4);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #059669, #0891b2);
+  --nova-akzent-transparent: rgb(16 185 129 / 0.16);
+  --nova-hover-light: #bbf7d0;
+  --nova-hover-dark: #14532d;
+}
+
+html[data-akzent="orange"] {
+  --nova-akzent: #f97316;
+  --nova-akzent-zweitfarbe: #f59e0b;
+  --nova-akzent-hover: #ea580c;
+  --nova-akzent-verlauf: linear-gradient(135deg, #f97316, #f59e0b);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #ea580c, #d97706);
+  --nova-akzent-transparent: rgb(249 115 22 / 0.16);
+  --nova-hover-light: #fed7aa;
+  --nova-hover-dark: #7c2d12;
+}
+
+html[data-akzent="red"] {
+  --nova-akzent: #ef4444;
+  --nova-akzent-zweitfarbe: #f97316;
+  --nova-akzent-hover: #dc2626;
+  --nova-akzent-verlauf: linear-gradient(135deg, #ef4444, #f97316);
+  --nova-akzent-verlauf-hover: linear-gradient(135deg, #dc2626, #ea580c);
+  --nova-akzent-transparent: rgb(239 68 68 / 0.16);
+  --nova-hover-light: #fecaca;
+  --nova-hover-dark: #451a1a;
+}
+
+body {
+  margin: 0;
+  background: var(--nova-hintergrund);
+  color: var(--nova-text);
+  font-family: Arial, Helvetica, sans-serif;
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+/* Einheitlicher Enterprise-Rahmen für bestehende NOVA-Masken. */
+.nova-enterprise-shell .nova-enterprise-content > main {
+  min-height: 100vh;
+}
+
+.nova-enterprise-shell .nova-enterprise-content main > section.ml-20,
+.nova-enterprise-shell .nova-enterprise-content main > section.pl-28,
+.nova-enterprise-shell .nova-enterprise-content main > div.ml-20 {
+  margin-left: 0 !important;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.nova-enterprise-shell .nova-enterprise-content main {
+  background: var(--nova-hintergrund);
+}
+
+html[data-theme="light"] .nova-enterprise-shell .nova-enterprise-content main {
+  background: #f3f6fb;
+}
+
+html[data-theme="light"] .nova-enterprise-shell .nova-enterprise-content :is(table, form, article, section, div)[class*="bg-[var(--nova-flaeche)]"] {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.nova-sidebar-scroll {
+  scrollbar-color: rgb(100 116 139 / 0.55) transparent;
+  scrollbar-width: thin;
+}
+
+.nova-enterprise-content input,
+.nova-enterprise-content select,
+.nova-enterprise-content textarea,
+.nova-enterprise-content button {
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.nova-enterprise-content button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.nova-akzent-verlauf { background-image: var(--nova-akzent-verlauf); }
+.nova-akzent-verlauf:hover { background-image: var(--nova-akzent-verlauf-hover); }
+
+html[data-schrift="klein"] { font-size: 14px; }
+html[data-schrift="normal"] { font-size: 16px; }
+html[data-schrift="gross"] { font-size: 18px; }
+@keyframes nova-motivation {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
+/* Einheitlicher NOVA-Enterprise-Rahmen für bestehende und neue Module */
+.nova-enterprise-content > .nova-enterprise-sidebar,
+.nova-enterprise-content .nova-enterprise-sidebar {
+  display: none !important;
+}
+
+.nova-enterprise-content > main,
+.nova-enterprise-content > section,
+.nova-enterprise-content main > section.ml-20,
+.nova-enterprise-content main > section[class*="ml-20"] {
+  margin-left: 0 !important;
+}
+
+.nova-enterprise-content > main,
+.nova-enterprise-content > section {
+  min-height: calc(100vh - 76px) !important;
+}
+
+.nova-enterprise-content .fixed.left-1\/2.top-4 {
+  display: none !important;
+}
+
+html[data-theme="light"] .nova-enterprise-content {
+  background: #f3f6fb;
+}
+
+html[data-theme="light"] .nova-enterprise-content [class*="bg-[var(--nova-flaeche)]"] {
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.nova-enterprise-content button[class*="bg-[var(--nova-akzent)]"],
+.nova-enterprise-content a[class*="bg-[var(--nova-akzent)]"] {
+  background: var(--nova-akzent-verlauf) !important;
+}
+
+.nova-enterprise-content input,
+.nova-enterprise-content select,
+.nova-enterprise-content textarea {
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.nova-enterprise-content input:focus,
+.nova-enterprise-content select:focus,
+.nova-enterprise-content textarea:focus {
+  border-color: var(--nova-akzent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nova-akzent) 16%, transparent);
+  outline: none;
+}
+
+@keyframes nova-flyout {
+  from {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Redesign-Dashboard: folgt dem globalen Hell-/Dunkelmodus. */
+.nova-next-dashboard {
+  background: var(--nova-hintergrund) !important;
+  color: var(--nova-text) !important;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.nova-next-dashboard header {
+  background: color-mix(in srgb, var(--nova-flaeche) 95%, transparent) !important;
+  border-color: var(--nova-rand) !important;
+}
+
+.nova-next-dashboard .bg-white {
+  background-color: var(--nova-flaeche) !important;
+}
+
+.nova-next-dashboard .bg-slate-50,
+.nova-next-dashboard .hover\:bg-slate-100:hover {
+  background-color: var(--nova-flaeche-hover) !important;
+}
+
+.nova-next-dashboard .border-slate-100,
+.nova-next-dashboard .border-slate-200,
+.nova-next-dashboard .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--nova-rand) !important;
+}
+
+.nova-next-dashboard .text-slate-900,
+.nova-next-dashboard .text-slate-800,
+.nova-next-dashboard .text-slate-700 {
+  color: var(--nova-text) !important;
+}
+
+.nova-next-dashboard .text-slate-500,
+.nova-next-dashboard .text-slate-400 {
+  color: var(--nova-text-schwaecher) !important;
+}
+
+.nova-next-dashboard .bg-slate-200 {
+  background-color: var(--nova-rand) !important;
+}
+
+html[data-theme="light"] .nova-next-dashboard .border-slate-100,
+html[data-theme="light"] .nova-next-dashboard .border-slate-200,
+html[data-theme="light"] .nova-next-dashboard header {
+  border-color: #aebdce !important;
+}
+
+html[data-theme="light"] .nova-next-dashboard .bg-white {
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.12);
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="bg-violet-50"] {
+  background-color: rgb(139 92 246 / 0.14) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="border-violet-100"] {
+  border-color: rgb(139 92 246 / 0.35) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="bg-indigo-50"] {
+  background-color: rgb(99 102 241 / 0.14) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="bg-emerald-50"] {
+  background-color: rgb(16 185 129 / 0.14) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="bg-amber-50"] {
+  background-color: rgb(245 158 11 / 0.14) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard [class*="bg-red-50"] {
+  background-color: rgb(239 68 68 / 0.14) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard .text-indigo-900,
+html[data-theme="dark"] .nova-next-dashboard .text-amber-900 {
+  color: var(--nova-text) !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard .text-emerald-700 {
+  color: #6ee7b7 !important;
+}
+
+html[data-theme="dark"] .nova-next-dashboard .text-amber-700 {
+  color: #fcd34d !important;
+}
