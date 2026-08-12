@@ -83,6 +83,45 @@ function dateigroesse(wert?: number) {
   return wert > 1024 * 1024 ? `${(wert / 1024 / 1024).toFixed(1)} MB` : `${Math.ceil(wert / 1024)} KB`;
 }
 
+type ApiFehler = {
+  fehler?: string;
+  meldung?: string;
+  details?: string;
+};
+
+async function apiAntwortLesen<T>(response: Response): Promise<T> {
+  const text = await response.text();
+
+  if (!text.trim()) {
+    throw new Error(
+      response.status === 401
+        ? "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an."
+        : `NOVA Connect erhielt keine Serverantwort (HTTP ${response.status}).`
+    );
+  }
+
+  let body: T & ApiFehler;
+
+  try {
+    body = JSON.parse(text) as T & ApiFehler;
+  } catch {
+    throw new Error(
+      `NOVA Connect erhielt eine ungültige Serverantwort (HTTP ${response.status}).`
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      body.fehler ||
+        body.meldung ||
+        body.details ||
+        "Die Aktion konnte nicht ausgeführt werden."
+    );
+  }
+
+  return body;
+}
+
 export default function KommunikationModul({ modus = "mail" }: { modus?: Modus }) {
   const [daten, setDaten] = useState<ConnectDaten | null>(null);
   const [fehler, setFehler] = useState("");
@@ -92,8 +131,7 @@ export default function KommunikationModul({ modus = "mail" }: { modus?: Modus }
     if (!leise) setLaden(true);
     try {
       const response = await fetch("/api/kommunikation", { cache: "no-store" });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.fehler || "NOVA Connect konnte nicht geladen werden.");
+      const body = await apiAntwortLesen<ConnectDaten>(response);
       setDaten(body);
       setFehler("");
     } catch (error) {
@@ -115,8 +153,7 @@ export default function KommunikationModul({ modus = "mail" }: { modus?: Modus }
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.fehler || "Aktion konnte nicht ausgeführt werden.");
+    const body = await apiAntwortLesen<Record<string, unknown>>(response);
     await ladenDaten(true);
     return body;
   }
@@ -192,8 +229,7 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
       const form = new FormData();
       Array.from(files).slice(0, 5).forEach((datei) => form.append("dateien", datei));
       const response = await fetch("/api/kommunikation/anhaenge", { method: "POST", body: form });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.fehler || "Dateien konnten nicht hochgeladen werden.");
+      const body = await apiAntwortLesen<{ anhaenge?: Anhang[] }>(response);
       setAnhaenge((alt) => [...alt, ...(body.anhaenge || [])].slice(0, 5));
     } catch (error) {
       alert(error instanceof Error ? error.message : "Upload fehlgeschlagen.");
@@ -297,9 +333,23 @@ function ChatBereich({ daten, aktion, nurTeams }: { daten: ConnectDaten; aktion:
   useEffect(() => { if (!sichtbareKanaele.some((k) => k.id === kanalId)) setKanalId(sichtbareKanaele[0]?.id || ""); }, [kanalId, sichtbareKanaele]);
 
   async function upload(files: FileList) {
-    const form = new FormData(); Array.from(files).slice(0, 5).forEach((f) => form.append("dateien", f));
-    const response = await fetch("/api/kommunikation/anhaenge", { method: "POST", body: form }); const body = await response.json();
-    if (response.ok) setDateien((alt) => [...alt, ...(body.anhaenge || [])]); else alert(body.fehler || "Upload fehlgeschlagen.");
+    try {
+      const form = new FormData();
+
+      Array.from(files)
+        .slice(0, 5)
+        .forEach((datei) => form.append("dateien", datei));
+
+      const response = await fetch("/api/kommunikation/anhaenge", {
+        method: "POST",
+        body: form,
+      });
+      const body = await apiAntwortLesen<{ anhaenge?: Anhang[] }>(response);
+
+      setDateien((alt) => [...alt, ...(body.anhaenge || [])].slice(0, 5));
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Upload fehlgeschlagen.");
+    }
   }
 
   async function senden() {

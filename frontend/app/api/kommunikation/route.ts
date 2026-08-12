@@ -86,6 +86,30 @@ function benutzerMail(nachname: string, vorname = "") {
   return `${slug(nachname || vorname || "mitarbeiter")}@nova-test.de`;
 }
 
+async function benutzerNachMail(email: string) {
+  const gesucht = email.trim().toLowerCase();
+
+  if (!gesucht) {
+    return null;
+  }
+
+  const benutzer = await prisma.benutzer.findMany({
+    where: { aktiv: true },
+    select: {
+      id: true,
+      vorname: true,
+      nachname: true,
+    },
+  });
+
+  return (
+    benutzer.find(
+      (eintrag) =>
+        benutzerMail(eintrag.nachname, eintrag.vorname) === gesucht
+    ) ?? null
+  );
+}
+
 async function demoSicherstellen(benutzer: {
   id: number;
   vorname: string;
@@ -157,12 +181,7 @@ async function kanalPruefen(kanalId: number, benutzerId: number) {
 }
 
 async function interneMailBenachrichtigung(empfaenger: string, absender: string, betreff: string) {
-  const nachname = empfaenger.split("@")[0]?.toLowerCase();
-  if (!nachname) return;
-  const benutzer = await prisma.benutzer.findFirst({
-    where: { aktiv: true, nachname: { equals: nachname, mode: "insensitive" } },
-    select: { id: true },
-  });
+  const benutzer = await benutzerNachMail(empfaenger);
   if (!benutzer) return;
   await prisma.interneBenachrichtigung.create({
     data: {
@@ -176,6 +195,7 @@ async function interneMailBenachrichtigung(empfaenger: string, absender: string,
 }
 
 export async function GET() {
+  try {
   const benutzer = await aktuellerBenutzer();
   if (!benutzer) return NextResponse.json({ fehler: "Nicht angemeldet." }, { status: 401 });
 
@@ -186,11 +206,11 @@ export async function GET() {
   const [mails, alleKanaele, meldungen, benutzerListe, sitzungen] = await Promise.all([
     prisma.novaMail.findMany({
       where: {
-        OR: [
-          { benutzerId: benutzer.id },
-          { empfaenger: { contains: eigeneMail, mode: "insensitive" } },
-          { absender: { equals: eigeneMail, mode: "insensitive" } },
-        ],
+      OR: [
+        { benutzerId: benutzer.id },
+        { empfaenger: { contains: eigeneMail } },
+        { absender: eigeneMail },
+      ],
       },
       orderBy: [{ empfangenAm: "desc" }, { gesendetAm: "desc" }],
       take: 300,
@@ -248,6 +268,17 @@ export async function GET() {
     meldungen,
     smtpKonfiguriert: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
   });
+  } catch (fehler) {
+    console.error("NOVA Connect konnte nicht geladen werden:", fehler);
+
+    return NextResponse.json(
+      {
+        fehler: "NOVA Connect konnte nicht geladen werden.",
+        details: fehler instanceof Error ? fehler.message : String(fehler),
+      },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -291,11 +322,7 @@ export async function POST(request: NextRequest) {
       });
 
       if (!istEntwurf && empfaenger.toLowerCase().endsWith("@nova-test.de")) {
-        const zielNachname = empfaenger.split("@")[0];
-        const ziel = await prisma.benutzer.findFirst({
-          where: { aktiv: true, nachname: { equals: zielNachname, mode: "insensitive" } },
-          select: { id: true },
-        });
+    const ziel = await benutzerNachMail(empfaenger);
         if (ziel && ziel.id !== benutzer.id) {
           await prisma.novaMail.create({
             data: {
