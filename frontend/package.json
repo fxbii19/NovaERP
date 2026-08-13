@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "private": true,
   "main": "desktop/main.cjs",
   "scripts": {
@@ -9,8 +9,9 @@
     "dev:netzwerk": "next dev --webpack -H 0.0.0.0 -p 3000",
     "demo": "node --env-file=.env --env-file=.env.local scripts/demo-testlauf.mjs",
     "desktop": "node scripts/desktop-start.cjs",
-    "desktop:installer": "npm run build && electron-builder --win nsis --publish never",
-    "desktop:release": "npm run build && electron-builder --win nsis --publish always",
+    "desktop:runtime": "node scripts/prepare-desktop-runtime.cjs",
+    "desktop:installer": "npm run desktop:runtime && npm run build && electron-builder --win nsis --publish never",
+    "desktop:release": "npm run desktop:runtime && npm run build && electron-builder --win nsis --publish always",
     "build": "next build && node scripts/ensure-prerender-manifest.cjs",
     "start": "next start",
     "start:netzwerk": "next start -H 0.0.0.0 -p 3000",
