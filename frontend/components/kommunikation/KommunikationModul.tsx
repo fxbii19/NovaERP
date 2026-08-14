@@ -249,6 +249,8 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
     setBetreff(mail ? `${mail.betreff.startsWith("Re:") ? "" : "Re: "}${mail.betreff}` : "");
     setInhalt(mail ? `\n\n--- Ursprüngliche Nachricht ---\n${mail.inhalt}` : "");
     setAnhaenge([]);
+    setAntwort("");
+    if (!mail) setAuswahl(null);
     setVerfassen(true);
   }
 
@@ -262,9 +264,25 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
   }
 
   async function mailOeffnen(mail: NovaMail) {
+    setVerfassen(false);
     setAuswahl(mail);
     if (!mail.gelesen && mail.ordner === "POSTEINGANG") await aktion({ aktion: "mail-gelesen", mailId: mail.id });
   }
+
+  const editor = (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div><h3 className="font-bold">{auswahl ? "Antwort schreiben" : "Neue E-Mail"}</h3><p className="mt-1 text-xs text-[var(--nova-text-schwaecher)]">Direkt in NOVA Mail verfassen</p></div>
+        <button type="button" onClick={() => setVerfassen(false)} className={buttonKlasse} title="Schließen"><X className="h-4 w-4" /></button>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2"><input value={empfaenger} onChange={(e) => setEmpfaenger(e.target.value)} placeholder="Empfänger" className={feldKlasse} /><input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="CC (optional)" className={feldKlasse} /></div>
+      <div className="flex gap-2"><input value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder="Betreff" className={feldKlasse} /><select className={`${feldKlasse} w-48`} defaultValue="" onChange={(e) => { const vorlage = mailVorlagen.find((v) => v.name === e.target.value); if (vorlage) { setBetreff(vorlage.betreff); setInhalt(vorlage.text); } }}><option value="">Vorlage wählen</option>{mailVorlagen.map((v) => <option key={v.name}>{v.name}</option>)}</select></div>
+      <textarea value={inhalt} onChange={(e) => setInhalt(e.target.value)} placeholder="Nachricht schreiben …" className={`${feldKlasse} min-h-52`} />
+      <div onDrop={drop} onDragOver={(e) => e.preventDefault()} onClick={() => fileRef.current?.click()} className="cursor-pointer rounded-lg border border-dashed border-[var(--nova-rand)] p-4 text-center text-sm text-[var(--nova-text-schwaecher)] hover:border-[var(--nova-akzent)]"><Paperclip className="mx-auto mb-1 h-5 w-5" />{hochladen ? "Dateien werden hochgeladen …" : "Dateien oder Screenshots hier ablegen oder auswählen"}<input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => e.target.files && void dateienHochladen(e.target.files)} /></div>
+      {anhaenge.length > 0 && <div className="flex flex-wrap gap-2">{anhaenge.map((datei) => <span key={datei.url} className="flex items-center gap-2 rounded-lg bg-[var(--nova-hintergrund)] px-3 py-2 text-xs"><File className="h-3.5 w-3.5" />{datei.name}<button onClick={() => setAnhaenge((alt) => alt.filter((a) => a.url !== datei.url))}><X className="h-3.5 w-3.5" /></button></span>)}</div>}
+      <div className="flex justify-end gap-2"><button onClick={() => void senden(true)} className={buttonKlasse}>Als Entwurf speichern</button><button onClick={() => void senden(false)} disabled={!empfaenger || !betreff || !inhalt.trim()} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40"><Send className="h-4 w-4" /> Senden</button></div>
+    </div>
+  );
 
   return (
     <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
@@ -292,29 +310,16 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
             </button>)}
           </div>
           <div className="min-w-0 p-5">
-            {!auswahl ? <LeererBereich icon={<Mail className="h-8 w-8" />} text="Wähle eine E-Mail aus, um die Unterhaltung zu öffnen." /> : <>
+            {!auswahl ? (verfassen ? editor : <LeererBereich icon={<Mail className="h-8 w-8" />} text="Wähle eine E-Mail aus, um die Unterhaltung zu öffnen." />) : <>
               <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{auswahl.betreff || "(Kein Betreff)"}</h2><p className="mt-1 text-xs text-[var(--nova-text-schwaecher)]">Von {auswahl.absender} · an {auswahl.empfaenger}</p></div><div className="flex gap-1"><button title="Favorit" onClick={() => void aktion({ aktion: "mail-wichtig", mailId: auswahl.id, wichtig: !auswahl.wichtig })} className={buttonKlasse}><Star className={`h-4 w-4 ${auswahl.wichtig ? "fill-amber-400 text-amber-400" : ""}`} /></button><button title="Papierkorb" onClick={() => { void aktion({ aktion: "mail-verschieben", mailId: auswahl.id, ordner: "PAPIERKORB" }); setAuswahl(null); }} className={buttonKlasse}><Trash2 className="h-4 w-4" /></button></div></div>
               <div className="my-5 whitespace-pre-wrap rounded-lg bg-[var(--nova-hintergrund)] p-4 text-sm leading-6">{auswahl.inhalt}</div>
               {auswahl.anhaenge.length > 0 && <div className="mb-5 flex flex-wrap gap-2">{auswahl.anhaenge.map((datei) => <a key={datei.url} href={datei.url} download className={`${buttonKlasse} flex items-center gap-2`}><File className="h-4 w-4" /><span>{datei.name}</span><Download className="h-3.5 w-3.5" /></a>)}</div>}
-              {auswahl.ordner !== "GESENDET" && <div className="border-t border-[var(--nova-rand)] pt-4"><textarea value={antwort} onChange={(e) => setAntwort(e.target.value)} placeholder="Antwort schreiben …" className={`${feldKlasse} min-h-24`} /><div className="mt-2 flex justify-end"><button onClick={() => { neu(auswahl); setInhalt(antwort ? `${antwort}\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}` : `\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}`); setAntwort(""); }} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white"><Reply className="h-4 w-4" /> Antwort vorbereiten</button></div></div>}
+              {auswahl.ordner !== "GESENDET" && (verfassen ? <div className="border-t border-[var(--nova-rand)] pt-4">{editor}</div> : <div className="border-t border-[var(--nova-rand)] pt-4"><textarea value={antwort} onChange={(e) => setAntwort(e.target.value)} placeholder="Antwort schreiben …" className={`${feldKlasse} min-h-24`} /><div className="mt-2 flex justify-end"><button onClick={() => { neu(auswahl); setInhalt(antwort ? `${antwort}\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}` : `\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}`); }} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white"><Reply className="h-4 w-4" /> Antworten</button></div></div>)}
             </>}
           </div>
         </div>
       </section>
 
-      {verfassen && <div className="fixed inset-0 z-50 flex items-end justify-end bg-black/45 p-4 backdrop-blur-sm" onMouseDown={(e) => { if (e.target === e.currentTarget) setVerfassen(false); }}>
-        <div className={`${kartenKlasse} w-full max-w-3xl overflow-hidden`}>
-          <div className="flex items-center justify-between border-b border-[var(--nova-rand)] px-5 py-4"><h2 className="text-lg font-bold">Neue E-Mail</h2><button onClick={() => setVerfassen(false)}><X className="h-5 w-5" /></button></div>
-          <div className="space-y-3 p-5">
-            <div className="grid gap-3 md:grid-cols-2"><input value={empfaenger} onChange={(e) => setEmpfaenger(e.target.value)} placeholder="Empfänger" className={feldKlasse} /><input value={cc} onChange={(e) => setCc(e.target.value)} placeholder="CC (optional)" className={feldKlasse} /></div>
-            <div className="flex gap-2"><input value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder="Betreff" className={feldKlasse} /><select className={`${feldKlasse} w-48`} defaultValue="" onChange={(e) => { const vorlage = mailVorlagen.find((v) => v.name === e.target.value); if (vorlage) { setBetreff(vorlage.betreff); setInhalt(vorlage.text); } }}><option value="">Vorlage wählen</option>{mailVorlagen.map((v) => <option key={v.name}>{v.name}</option>)}</select></div>
-            <textarea value={inhalt} onChange={(e) => setInhalt(e.target.value)} placeholder="Nachricht schreiben …" className={`${feldKlasse} min-h-52`} />
-            <div onDrop={drop} onDragOver={(e) => e.preventDefault()} onClick={() => fileRef.current?.click()} className="cursor-pointer rounded-lg border border-dashed border-[var(--nova-rand)] p-4 text-center text-sm text-[var(--nova-text-schwaecher)] hover:border-[var(--nova-akzent)]"><Paperclip className="mx-auto mb-1 h-5 w-5" />{hochladen ? "Dateien werden hochgeladen …" : "Dateien oder Screenshots hier ablegen oder auswählen"}<input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => e.target.files && void dateienHochladen(e.target.files)} /></div>
-            {anhaenge.length > 0 && <div className="flex flex-wrap gap-2">{anhaenge.map((datei) => <span key={datei.url} className="flex items-center gap-2 rounded-lg bg-[var(--nova-hintergrund)] px-3 py-2 text-xs"><File className="h-3.5 w-3.5" />{datei.name}<button onClick={() => setAnhaenge((alt) => alt.filter((a) => a.url !== datei.url))}><X className="h-3.5 w-3.5" /></button></span>)}</div>}
-            <div className="flex justify-end gap-2"><button onClick={() => void senden(true)} className={buttonKlasse}>Als Entwurf speichern</button><button onClick={() => void senden(false)} disabled={!empfaenger || !betreff || !inhalt} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40"><Send className="h-4 w-4" /> Senden</button></div>
-          </div>
-        </div>
-      </div>}
     </div>
   );
 }
