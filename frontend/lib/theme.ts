@@ -67,7 +67,9 @@ export type SpracheRegion =
   | "de-DE"
   | "en-GB"
   | "es-ES"
-  | "tr-TR";
+  | "tr-TR"
+  | "it-IT"
+  | "ru-RU";
 
 export type AnimationsModus =
   | "voll"

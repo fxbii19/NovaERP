@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import NovaAppLayout from "../components/NovaAppLayout";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import GlobalLanguage from "@/components/GlobalLanguage";
 
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-slate-950 text-white">
   <ThemeProvider>
+    <GlobalLanguage />
     <NovaAppLayout>
       {children}
     </NovaAppLayout>

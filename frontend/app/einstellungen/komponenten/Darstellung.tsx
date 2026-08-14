@@ -58,6 +58,8 @@ const REGIONEN: Array<{ wert: SpracheRegion; titel: string; beschreibung: string
   { wert: "en-GB", titel: "English", beschreibung: "United Kingdom · £1,234.56 · DD/MM/YYYY" },
   { wert: "es-ES", titel: "Español", beschreibung: "España · 1234,56 € · DD/MM/AAAA" },
   { wert: "tr-TR", titel: "Türkçe", beschreibung: "Türkiye · ₺1.234,56 · GG.AA.YYYY" },
+  { wert: "it-IT", titel: "Italiano", beschreibung: "Italia · 1.234,56 € · GG/MM/AAAA" },
+  { wert: "ru-RU", titel: "Русский", beschreibung: "Россия · 1 234,56 ₽ · ДД.ММ.ГГГГ" },
 ];
 
 type Bereich = "design" | "akzent" | "schrift" | "region" | "vorschau";
