@@ -33,7 +33,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ClipboardEvent, DragEvent, FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type Modus = "mail" | "chat" | "team" | "dateien" | "besprechungen" | "ai" | "system" | "automatisch";
 type Anhang = { name: string; url: string; typ?: string; groesse?: number };
@@ -254,6 +254,15 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
     setVerfassen(true);
   }
 
+  function screenshotEinfuegen(event: ClipboardEvent<HTMLTextAreaElement>) {
+    const dateien = Array.from(event.clipboardData.items)
+      .filter((eintrag) => eintrag.kind === "file")
+      .map((eintrag) => eintrag.getAsFile())
+      .filter((datei): datei is File => datei !== null);
+
+    if (dateien.length > 0) void dateienHochladen(dateien);
+  }
+
   async function senden(entwurf = false) {
     try {
       await aktion({ aktion: entwurf ? "mail-speichern" : "mail-senden", empfaenger, cc, betreff, inhalt, anhaenge });
@@ -265,8 +274,31 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
 
   async function mailOeffnen(mail: NovaMail) {
     setVerfassen(false);
+    setAntwort("");
+    setAnhaenge([]);
     setAuswahl(mail);
     if (!mail.gelesen && mail.ordner === "POSTEINGANG") await aktion({ aktion: "mail-gelesen", mailId: mail.id });
+  }
+
+  async function antwortSenden(mail: NovaMail) {
+    if (!antwort.trim() || hochladen) return;
+
+    try {
+      await aktion({
+        aktion: "mail-senden",
+        empfaenger: mail.absender,
+        cc: "",
+        betreff: `${mail.betreff.startsWith("Re:") ? "" : "Re: "}${mail.betreff}`,
+        inhalt: `${antwort.trim()}\n\n--- Ursprüngliche Nachricht ---\n${mail.inhalt}`,
+        anhaenge,
+      });
+      setAntwort("");
+      setAnhaenge([]);
+      setAuswahl(null);
+      setAktiverOrdner("GESENDET");
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Antwort konnte nicht gesendet werden.");
+    }
   }
 
   const editor = (
@@ -314,7 +346,15 @@ function MailBereich({ daten, aktion }: { daten: ConnectDaten; aktion: (payload:
               <div className="flex items-start justify-between gap-3"><div><h2 className="text-xl font-bold">{auswahl.betreff || "(Kein Betreff)"}</h2><p className="mt-1 text-xs text-[var(--nova-text-schwaecher)]">Von {auswahl.absender} · an {auswahl.empfaenger}</p></div><div className="flex gap-1"><button title="Favorit" onClick={() => void aktion({ aktion: "mail-wichtig", mailId: auswahl.id, wichtig: !auswahl.wichtig })} className={buttonKlasse}><Star className={`h-4 w-4 ${auswahl.wichtig ? "fill-amber-400 text-amber-400" : ""}`} /></button><button title="Papierkorb" onClick={() => { void aktion({ aktion: "mail-verschieben", mailId: auswahl.id, ordner: "PAPIERKORB" }); setAuswahl(null); }} className={buttonKlasse}><Trash2 className="h-4 w-4" /></button></div></div>
               <div className="my-5 whitespace-pre-wrap rounded-lg bg-[var(--nova-hintergrund)] p-4 text-sm leading-6">{auswahl.inhalt}</div>
               {auswahl.anhaenge.length > 0 && <div className="mb-5 flex flex-wrap gap-2">{auswahl.anhaenge.map((datei) => <a key={datei.url} href={datei.url} download className={`${buttonKlasse} flex items-center gap-2`}><File className="h-4 w-4" /><span>{datei.name}</span><Download className="h-3.5 w-3.5" /></a>)}</div>}
-              {auswahl.ordner !== "GESENDET" && (verfassen ? <div className="border-t border-[var(--nova-rand)] pt-4">{editor}</div> : <div className="border-t border-[var(--nova-rand)] pt-4"><textarea value={antwort} onChange={(e) => setAntwort(e.target.value)} placeholder="Antwort schreiben …" className={`${feldKlasse} min-h-24`} /><div className="mt-2 flex justify-end"><button onClick={() => { neu(auswahl); setInhalt(antwort ? `${antwort}\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}` : `\n\n--- Ursprüngliche Nachricht ---\n${auswahl.inhalt}`); }} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white"><Reply className="h-4 w-4" /> Antworten</button></div></div>)}
+              {auswahl.ordner !== "GESENDET" && <div className="border-t border-[var(--nova-rand)] pt-4">
+                <textarea value={antwort} onChange={(e) => setAntwort(e.target.value)} onPaste={screenshotEinfuegen} placeholder="Antwort schreiben oder Screenshot mit Strg + V einfügen …" className={`${feldKlasse} min-h-28`} />
+                {anhaenge.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{anhaenge.map((datei) => <span key={datei.url} className="flex items-center gap-2 rounded-lg bg-[var(--nova-hintergrund)] px-3 py-2 text-xs"><File className="h-3.5 w-3.5" />{datei.name}<button onClick={() => setAnhaenge((alt) => alt.filter((a) => a.url !== datei.url))}><X className="h-3.5 w-3.5" /></button></span>)}</div>}
+                <div className="mt-3 flex flex-wrap justify-end gap-2">
+                  <button type="button" onClick={() => fileRef.current?.click()} className={`${buttonKlasse} flex items-center gap-2`}><Paperclip className="h-4 w-4" /> Dateien einfügen</button>
+                  <input ref={fileRef} type="file" multiple className="hidden" onChange={(e) => e.target.files && void dateienHochladen(e.target.files)} />
+                  <button type="button" onClick={() => void antwortSenden(auswahl)} disabled={!antwort.trim() || hochladen} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold text-white disabled:opacity-40"><Reply className="h-4 w-4" /> {hochladen ? "Dateien werden geladen …" : "Antworten"}</button>
+                </div>
+              </div>}
             </>}
           </div>
         </div>
