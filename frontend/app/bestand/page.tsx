@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useSearchParams } from "next/navigation";
 
 import BestandImport from "../../components/bestand/BestandImport";
 import BestandTabelle, {
@@ -44,6 +45,8 @@ const leeresFormular: NeuerArtikelFormular = {
 };
 
 export default function BestandSeite() {
+  const searchParams = useSearchParams();
+  const initialerBestandsstatus = searchParams.get("filter") === "kritisch" ? "kritisch" : "alle";
   const [artikel, setArtikel] = useState<
     DatenbankArtikel[]
   >([]);
@@ -338,6 +341,7 @@ export default function BestandSeite() {
                 artikel={artikel}
                 istAdmin={istAdmin}
                 rolle={user?.rolle ?? ""}
+                initialerBestandsstatus={initialerBestandsstatus}
                 onAktualisieren={artikelLaden}
               />
             ) : (

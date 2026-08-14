@@ -423,7 +423,7 @@ export default function NovaNextPage() {
                 <Aufgabe titel="MDE-Erfassungen bestätigen" wert={daten?.kennzahlen.offeneMde} href="/lager/produktzugang" />
                 <Aufgabe titel="Qualitätsprüfungen bearbeiten" wert={daten?.kennzahlen.offeneQs} href="/qualitaet/pruefauftraege" />
                 <Aufgabe titel="Inventurdifferenzen prüfen" wert={daten?.kennzahlen.offeneInventuren} href="/lager/inventur" />
-                <Aufgabe titel="Kritische Bestände bearbeiten" wert={daten?.kennzahlen.kritischeBestaende} href="/bestand" />
+                <Aufgabe titel="Kritische Bestände bearbeiten" wert={daten?.kennzahlen.kritischeBestaende} href="/bestand?filter=kritisch" />
               </div>
             </div>
 

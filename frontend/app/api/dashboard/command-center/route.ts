@@ -33,7 +33,7 @@ export async function GET() {
     ]));
 
     const warnungen = [
-      kritischeBestaende > 0 && { stufe: "kritisch", titel: "Mindestbestand unterschritten", text: `${kritischeBestaende} Artikel benötigen Aufmerksamkeit.`, href: "/bestand" },
+      kritischeBestaende > 0 && { stufe: "kritisch", titel: "Mindestbestand unterschritten", text: `${kritischeBestaende} Artikel benötigen Aufmerksamkeit.`, href: "/bestand?filter=kritisch" },
       sperrbestaende > 0 && { stufe: "kritisch", titel: "Gesperrter Bestand", text: `${sperrbestaende} QS-Positionen sind gesperrt.`, href: "/qualitaet/sperrbestand" },
       offeneInventuren > 0 && { stufe: "warnung", titel: "Inventurdifferenzen offen", text: `${offeneInventuren} Differenzen warten auf Prüfung.`, href: "/lager/inventur" },
       offeneMde > 0 && { stufe: "warnung", titel: "MDE-Bestätigung ausstehend", text: `${offeneMde} Erfassungen sind noch nicht bestätigt.`, href: "/lager/produktzugang" },

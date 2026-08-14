@@ -27,6 +27,7 @@ type BestandTabelleProps = {
   artikel: DatenbankArtikel[];
   istAdmin: boolean;
   rolle: string;
+  initialerBestandsstatus?: string;
   onAktualisieren: () => Promise<void>;
 };
 
@@ -214,6 +215,7 @@ export default function BestandTabelle({
   artikel,
   istAdmin,
   rolle,
+  initialerBestandsstatus = "alle",
   onAktualisieren,
 }: BestandTabelleProps) {
   const [suche, setSuche] = useState("");
@@ -233,7 +235,7 @@ export default function BestandTabelle({
   const [spaltenmenueOffen, setSpaltenmenueOffen] =
     useState(false);
   const [filtermenueOffen, setFiltermenueOffen] = useState(false);
-  const [bestandsstatus, setBestandsstatus] = useState("alle");
+  const [bestandsstatus, setBestandsstatus] = useState(initialerBestandsstatus);
   const [groessenfilter, setGroessenfilter] = useState("alle");
   const [variantenfilter, setVariantenfilter] = useState("alle");
   const [sortierung, setSortierung] =
@@ -330,7 +332,7 @@ export default function BestandTabelle({
         (bestandsstatus === "leer" && eintrag.verfuegbar <= 0) ||
         (bestandsstatus === "kritisch" &&
           eintrag.mindestbestand > 0 &&
-          eintrag.verfuegbar < eintrag.mindestbestand);
+          eintrag.verfuegbar <= eintrag.mindestbestand);
 
       const passtZurGroesse =
         groessenfilter === "alle" || eintrag.groesse === groessenfilter;
