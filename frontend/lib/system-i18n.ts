@@ -1,4 +1,5 @@
 import type { SpracheRegion } from "@/lib/theme";
+import generiert from "@/lib/system-i18n.generated.json";
 
 type Woerterbuch = Record<string, string>;
 
@@ -20,5 +21,6 @@ const RU: Woerterbuch = { ...EN, Unternehmen:"Компания",Prozesse:"Про
 export function systemText(region: SpracheRegion, deutsch: string): string {
   if (region === "de-DE") return deutsch;
   const dict = region === "es-ES" ? ES : region === "tr-TR" ? TR : region === "it-IT" ? IT : region === "ru-RU" ? RU : EN;
-  return dict[deutsch] ?? deutsch;
+  const vollstaendig = generiert[region as keyof typeof generiert] as Woerterbuch | undefined;
+  return dict[deutsch] ?? vollstaendig?.[deutsch] ?? deutsch;
 }

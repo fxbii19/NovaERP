@@ -4,8 +4,11 @@ import { useEffect } from "react";
 import { useTheme } from "@/components/ThemeProvider";
 import { systemText } from "@/lib/system-i18n";
 
-const originalTexte = new WeakMap<Text, string>();
-const originalAttribute = new WeakMap<Element, Record<string, string>>();
+type TextZustand = { original: string; zuletztGesetzt: string };
+type AttributZustand = Record<string, { original: string; zuletztGesetzt: string }>;
+
+const textZustaende = new WeakMap<Text, TextZustand>();
+const attributZustaende = new WeakMap<Element, AttributZustand>();
 const ATTRIBUTE = ["placeholder", "title", "aria-label"];
 
 export default function GlobalLanguage() {
@@ -22,10 +25,18 @@ export default function GlobalLanguage() {
         const parent = node.parentElement;
         if (parent && !parent.closest("script,style,textarea,code,pre,[data-no-translate]")) {
           const aktuell = node.nodeValue ?? "";
-          if (!originalTexte.has(node)) originalTexte.set(node, aktuell);
-          const original = originalTexte.get(node) ?? aktuell;
+          let zustand = textZustaende.get(node);
+          if (!zustand || aktuell !== zustand.zuletztGesetzt) {
+            zustand = { original: aktuell, zuletztGesetzt: aktuell };
+          }
+          const original = zustand.original;
           const kern = original.trim();
-          if (kern) node.nodeValue = original.replace(kern, systemText(region, kern));
+          if (kern) {
+            const uebersetzt = original.replace(kern, systemText(region, kern));
+            node.nodeValue = uebersetzt;
+            zustand.zuletztGesetzt = uebersetzt;
+          }
+          textZustaende.set(node, zustand);
         }
         node = walker.nextNode() as Text | null;
       }
@@ -33,13 +44,19 @@ export default function GlobalLanguage() {
       const elemente = root instanceof Element ? [root, ...root.querySelectorAll("*")] : [...root.querySelectorAll("*")];
       for (const element of elemente) {
         if (element.matches("[data-no-translate]")) continue;
-        const originals = originalAttribute.get(element) ?? {};
+        const zustaende = attributZustaende.get(element) ?? {};
         for (const attribut of ATTRIBUTE) {
           const wert = element.getAttribute(attribut);
-          if (wert && !originals[attribut]) originals[attribut] = wert;
-          if (originals[attribut]) element.setAttribute(attribut, systemText(region, originals[attribut]));
+          if (wert && (!zustaende[attribut] || wert !== zustaende[attribut].zuletztGesetzt)) {
+            zustaende[attribut] = { original: wert, zuletztGesetzt: wert };
+          }
+          if (zustaende[attribut]) {
+            const uebersetzt = systemText(region, zustaende[attribut].original);
+            element.setAttribute(attribut, uebersetzt);
+            zustaende[attribut].zuletztGesetzt = uebersetzt;
+          }
         }
-        originalAttribute.set(element, originals);
+        attributZustaende.set(element, zustaende);
       }
     }
 
