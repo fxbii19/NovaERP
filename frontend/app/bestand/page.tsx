@@ -2,6 +2,7 @@
 
 import {
   FormEvent,
+  Suspense,
   useCallback,
   useEffect,
   useState,
@@ -45,6 +46,10 @@ const leeresFormular: NeuerArtikelFormular = {
 };
 
 export default function BestandSeite() {
+  return <Suspense fallback={<div className="p-8 text-[var(--nova-text-schwaecher)]">Bestand wird geladen...</div>}><BestandInhalt /></Suspense>;
+}
+
+function BestandInhalt() {
   const searchParams = useSearchParams();
   const initialerBestandsstatus = searchParams.get("filter") === "kritisch" ? "kritisch" : "alle";
   const [artikel, setArtikel] = useState<
