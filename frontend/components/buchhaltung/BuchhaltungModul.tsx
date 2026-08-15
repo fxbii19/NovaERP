@@ -61,6 +61,7 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
   const [daten, setDaten] = useState<Daten | null>(null);
   const [fehler, setFehler] = useState("");
   const [sendet, setSendet] = useState(false);
+  const [uebersichtsfilter, setUebersichtsfilter] = useState<"alle" | "offene-rechnungen" | "offene-posten" | "ueberfaellig" | "heute-bezahlt">("alle");
   const [rechnung, setRechnung] = useState({
     kundeId: "",
     betreff: "",
@@ -157,6 +158,20 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
           new Date(z.gebuchtAm).toDateString() === new Date().toDateString(),
       )
       .reduce((s, z) => s + z.betrag, 0) ?? 0;
+  const heuteRechnungen =
+    daten?.rechnungen.filter((r) =>
+      r.zahlungen.some(
+        (z) => new Date(z.gebuchtAm).toDateString() === new Date().toDateString(),
+      ),
+    ) ?? [];
+  const uebersichtRechnungen =
+    uebersichtsfilter === "offene-rechnungen" || uebersichtsfilter === "offene-posten"
+      ? offen
+      : uebersichtsfilter === "ueberfaellig"
+        ? offen.filter((r) => new Date(r.faelligAm) < new Date())
+        : uebersichtsfilter === "heute-bezahlt"
+          ? heuteRechnungen
+          : daten?.rechnungen.slice(0, 10) ?? [];
   const [titel, untertitel] = TITEL[modus];
   return (
     <main className="min-h-screen bg-[var(--nova-hintergrund)] text-[var(--nova-text)]">
@@ -178,12 +193,13 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
           {daten && modus === "uebersicht" && (
             <>
               <div className="mt-8 grid gap-4 md:grid-cols-4">
-                <Karte t="Offene Rechnungen" w={offen.length.toString()} />
-                <Karte t="Offene Posten" w={euro(offeneSumme)} />
-                <Karte t="Überfällig" w={ueberfaellig.toString()} />
-                <Karte t="Heute bezahlt" w={euro(heute)} />
+                <Karte t="Offene Rechnungen" w={offen.length.toString()} aktiv={uebersichtsfilter === "offene-rechnungen"} onClick={() => setUebersichtsfilter(uebersichtsfilter === "offene-rechnungen" ? "alle" : "offene-rechnungen")} />
+                <Karte t="Offene Posten" w={euro(offeneSumme)} aktiv={uebersichtsfilter === "offene-posten"} onClick={() => setUebersichtsfilter(uebersichtsfilter === "offene-posten" ? "alle" : "offene-posten")} />
+                <Karte t="Überfällig" w={ueberfaellig.toString()} aktiv={uebersichtsfilter === "ueberfaellig"} onClick={() => setUebersichtsfilter(uebersichtsfilter === "ueberfaellig" ? "alle" : "ueberfaellig")} />
+                <Karte t="Heute bezahlt" w={euro(heute)} aktiv={uebersichtsfilter === "heute-bezahlt"} onClick={() => setUebersichtsfilter(uebersichtsfilter === "heute-bezahlt" ? "alle" : "heute-bezahlt")} />
               </div>
-              <Liste rechnungen={daten.rechnungen.slice(0, 10)} />
+              {uebersichtsfilter !== "alle" && <div className="mt-5 flex items-center justify-between rounded-xl border border-[var(--nova-akzent)]/30 bg-[var(--nova-akzent)]/10 px-4 py-3 text-sm"><span>Aktiver Filter: <b>{uebersichtsfilter === "heute-bezahlt" ? "Heute bezahlt" : uebersichtsfilter === "ueberfaellig" ? "Überfällige Rechnungen" : "Offene Rechnungen und Posten"}</b></span><button type="button" onClick={() => setUebersichtsfilter("alle")} className="font-semibold text-[var(--nova-akzent)]">Alle anzeigen</button></div>}
+              <Liste rechnungen={uebersichtRechnungen} />
             </>
           )}
           {daten && modus === "rechnungen" && (
@@ -312,12 +328,13 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
 function euro(v: number) {
   return v.toLocaleString("de-DE", { style: "currency", currency: "EUR" });
 }
-function Karte({ t, w }: { t: string; w: string }) {
+function Karte({ t, w, aktiv, onClick }: { t: string; w: string; aktiv: boolean; onClick: () => void }) {
   return (
-    <div className="rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-6">
+    <button type="button" onClick={onClick} className={`group cursor-pointer rounded-2xl border bg-[var(--nova-flaeche)] p-6 text-left transition hover:-translate-y-0.5 hover:border-[var(--nova-akzent)] hover:shadow-lg ${aktiv ? "border-[var(--nova-akzent)] ring-2 ring-[var(--nova-akzent)]/20" : "border-[var(--nova-rand)]"}`}>
       <p className="text-sm text-[var(--nova-text-schwaecher)]">{t}</p>
       <p className="mt-3 text-2xl font-bold">{w}</p>
-    </div>
+      <p className="mt-2 text-xs text-[var(--nova-text-schwaecher)]">{aktiv ? "Filter aktiv" : "Anklicken für Details"}</p>
+    </button>
   );
 }
 function Form({
