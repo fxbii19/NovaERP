@@ -87,10 +87,20 @@ export async function POST(request: NextRequest) {
     }
     if (aktion === "zahlung-buchen") {
       const rechnung = await prisma.rechnung.findUnique({ where: { id: Number(d.rechnungId) }, include: { zahlungen: true } }); if (!rechnung) return NextResponse.json({ fehler: "Rechnung nicht gefunden." }, { status: 404 });
-      const rest = Math.max(0, rechnung.bruttowert - rechnung.zahlungen.reduce((s, z) => s + z.betrag, 0)); const betrag = Math.min(rest, Math.max(0, Number(d.betrag) || 0)); if (!betrag) return NextResponse.json({ fehler: "Bitte einen gültigen Betrag eingeben." }, { status: 400 });
-      const zahlung = await prisma.zahlung.create({ data: { rechnungId: rechnung.id, betrag, zahlungsart: String(d.zahlungsart ?? "Überweisung"), referenz: String(d.referenz ?? "").trim() || null, gebuchtVon: name } });
-      const neuerRest = rest - betrag; if (neuerRest < 0.01) await prisma.rechnung.update({ where: { id: rechnung.id }, data: { status: "BEZAHLT", bezahltAm: new Date() } });
-      return NextResponse.json(zahlung);
+      const bisherBezahlt = rechnung.zahlungen.reduce((s, z) => s + z.betrag, 0);
+      const rest = Math.max(0, Math.round((rechnung.bruttowert - bisherBezahlt) * 100) / 100);
+      const eingegeben = Math.round(Math.max(0, Number(d.betrag) || 0) * 100) / 100;
+      if (!eingegeben) return NextResponse.json({ fehler: "Bitte einen gültigen Betrag eingeben." }, { status: 400 });
+      if (eingegeben > rest) return NextResponse.json({ fehler: `Der Zahlungseingang darf den offenen Betrag von ${rest.toFixed(2)} EUR nicht überschreiten.` }, { status: 400 });
+
+      const neuerRest = Math.max(0, Math.round((rest - eingegeben) * 100) / 100);
+      const neuerStatus = neuerRest < 0.01 ? "BEZAHLT" : "TEILBEZAHLT";
+      const zahlung = await prisma.$transaction(async (tx) => {
+        const gebucht = await tx.zahlung.create({ data: { rechnungId: rechnung.id, betrag: eingegeben, zahlungsart: String(d.zahlungsart ?? "Überweisung"), referenz: String(d.referenz ?? "").trim() || null, gebuchtVon: name } });
+        await tx.rechnung.update({ where: { id: rechnung.id }, data: { status: neuerStatus, bezahltAm: neuerStatus === "BEZAHLT" ? new Date() : null } });
+        return gebucht;
+      });
+      return NextResponse.json({ zahlung, bisherBezahlt, neuBezahlt: Math.round((bisherBezahlt + eingegeben) * 100) / 100, offenerRest: neuerRest, status: neuerStatus });
     }
     return NextResponse.json({ fehler: "Unbekannte Aktion." }, { status: 400 });
   } catch (error) { console.error("Buchhaltungsaktion fehlgeschlagen:", error); return NextResponse.json({ fehler: "Der Vorgang konnte nicht gespeichert werden." }, { status: 500 }); }
