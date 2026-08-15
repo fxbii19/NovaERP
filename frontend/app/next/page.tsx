@@ -229,6 +229,7 @@ export default function NovaNextPage() {
   const [demoLaedt, setDemoLaedt] = useState(false);
   const [demoMeldung, setDemoMeldung] = useState("");
   const [demoAblauf, setDemoAblauf] = useState<DemoAblauf | null>(null);
+  const [demoDetailsOffen, setDemoDetailsOffen] = useState(false);
   const [umsatzDetails, setUmsatzDetails] = useState<"versendet" | "bezahlt" | null>(null);
   const [offenesUntermenue, setOffenesUntermenue] = useState<{
     name: string;
@@ -297,6 +298,13 @@ export default function NovaNextPage() {
     user?.personalnummer === "10000" &&
     user.vorname.toLocaleLowerCase("de-DE") === "nova" &&
     user.nachname.toLocaleLowerCase("de-DE") === "demo";
+  const demoAbgeschlossen = demoAblauf?.schritte.length
+    ? demoAblauf.schritte.every((schritt) => schritt.status === "ERLEDIGT")
+    : false;
+
+  useEffect(() => {
+    if (demoAbgeschlossen) setDemoDetailsOffen(false);
+  }, [demoAbgeschlossen]);
 
   useEffect(() => {
     if (!istDemo) return;
@@ -326,6 +334,7 @@ export default function NovaNextPage() {
       if (antwort.ok && ergebnis.schritte) {
         const ablauf: DemoAblauf = { bestellnummer: ergebnis.bestellnummer, lieferscheinnummer: ergebnis.lieferscheinnummer, schritte: ergebnis.schritte };
         setDemoAblauf(ablauf);
+        setDemoDetailsOffen(false);
         window.sessionStorage.setItem(DEMO_ABLAUF_KEY, JSON.stringify(ablauf));
         await laden();
       }
@@ -454,10 +463,11 @@ export default function NovaNextPage() {
 
         <main className="mx-auto max-w-[1700px] p-5 xl:p-7">
           {(istDemo || demoMeldung) && <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 p-4"><div><p className="text-sm font-semibold text-indigo-900">NOVA Demo-Modus</p><p className="text-xs text-indigo-700">{demoMeldung || "Bereite mit einem Klick einen vollständigen Testlauf vor."}</p></div>{istDemo && <button type="button" onClick={() => void demoVorbereiten()} disabled={demoLaedt} className="nova-akzent-verlauf rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{demoLaedt ? "Demo wird vorbereitet ..." : "Demo-Testlauf starten"}</button>}</div>}
-          {demoAblauf && <section className="mb-5 overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-sm">
+          {demoAblauf && demoAbgeschlossen && !demoDetailsOffen && <section className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-emerald-300 bg-emerald-50 p-5 shadow-sm"><div className="flex items-center gap-4"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-500 text-white"><CheckCircle2 className="h-6 w-6" /></span><div><h2 className="font-bold text-emerald-950">Demo-Testlauf erfolgreich abgeschlossen</h2><p className="mt-1 text-sm text-emerald-700">Alle 8 Prozessschritte wurden vollständig und in der richtigen Reihenfolge erledigt.</p></div></div><button type="button" onClick={() => setDemoDetailsOffen(true)} className="rounded-lg border border-emerald-400 bg-white px-4 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100">Details anzeigen</button></section>}
+          {demoAblauf && (!demoAbgeschlossen || demoDetailsOffen) && <section className="mb-5 overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 bg-indigo-50 px-5 py-4">
               <div><h2 className="font-bold text-indigo-950">Geführter NOVA-Demoablauf</h2><p className="mt-1 text-xs text-indigo-700">Arbeite die Stationen der Reihe nach ab. Der erste Schritt ist vorbereitet.</p></div>
-              <div className="text-right text-xs text-indigo-800"><p><b>Bestellung:</b> {demoAblauf.bestellnummer ?? "–"}</p><p><b>Lieferschein:</b> {demoAblauf.lieferscheinnummer ?? "–"}</p></div>
+              <div className="flex items-center gap-4"><div className="text-right text-xs text-indigo-800"><p><b>Bestellung:</b> {demoAblauf.bestellnummer ?? "–"}</p><p><b>Lieferschein:</b> {demoAblauf.lieferscheinnummer ?? "–"}</p></div>{demoAbgeschlossen && <button type="button" onClick={() => setDemoDetailsOffen(false)} className="rounded-lg border border-indigo-300 bg-white px-3 py-2 text-xs font-semibold text-indigo-800">Einklappen</button>}</div>
             </div>
             <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
               {demoAblauf.schritte.map((schritt) => {
