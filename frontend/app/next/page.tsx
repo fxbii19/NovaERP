@@ -31,6 +31,7 @@ import {
   Users,
   Warehouse,
   WandSparkles,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -58,7 +59,12 @@ type DashboardDaten = {
     kommissioniertHeute: number;
     versendetHeute: number;
   };
-  umsatz: { versendetHeute: number; bezahltHeute: number } | null;
+  umsatz: {
+    versendetHeute: number;
+    bezahltHeute: number;
+    sendungen: Array<{ id: number; versandnummer: string; auftragsnummer: string; kunde: string; warenwert: number; versendetAm: string | null; versendetVon: string | null; lieferscheinnummer: string | null }>;
+    zahlungen: Array<{ id: number; rechnungsnummer: string; kunde: string; betreff: string; betrag: number; zahlungsart: string; referenz: string | null; gebuchtAm: string; gebuchtVon: string | null }>;
+  } | null;
   warnungen: Array<{ stufe: string; titel: string; text: string; href: string }>;
   empfehlungen: string[];
 };
@@ -223,6 +229,7 @@ export default function NovaNextPage() {
   const [demoLaedt, setDemoLaedt] = useState(false);
   const [demoMeldung, setDemoMeldung] = useState("");
   const [demoAblauf, setDemoAblauf] = useState<DemoAblauf | null>(null);
+  const [umsatzDetails, setUmsatzDetails] = useState<"versendet" | "bezahlt" | null>(null);
   const [offenesUntermenue, setOffenesUntermenue] = useState<{
     name: string;
     oben: number;
@@ -476,9 +483,11 @@ export default function NovaNextPage() {
           </section>
 
           {daten?.umsatz && <section className="mb-5 grid gap-4 lg:grid-cols-2">
-            <UmsatzKarte titel="Heute versendet" wert={daten.umsatz.versendetHeute} farbe="emerald" />
-            <UmsatzKarte titel="Heute bezahlt" wert={daten.umsatz.bezahltHeute} farbe="cyan" />
+            <UmsatzKarte titel="Heute versendet" wert={daten.umsatz.versendetHeute} farbe="emerald" anzahl={daten.umsatz.sendungen.length} einheit="Sendungen" onClick={() => setUmsatzDetails("versendet")} />
+            <UmsatzKarte titel="Heute bezahlt" wert={daten.umsatz.bezahltHeute} farbe="cyan" anzahl={daten.umsatz.zahlungen.length} einheit="Zahlungen" onClick={() => setUmsatzDetails("bezahlt")} />
           </section>}
+
+          {umsatzDetails && daten?.umsatz && <UmsatzDetails typ={umsatzDetails} umsatz={daten.umsatz} schliessen={() => setUmsatzDetails(null)} />}
 
           <section className="mb-5 grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
             <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -511,8 +520,14 @@ function Kennzahl({ icon: Icon, titel, wert, farbe }: { icon: LucideIcon; titel:
   return <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className={`mb-4 inline-flex rounded-lg p-2.5 ${farben[farbe]}`}><Icon className="h-5 w-5" /></div><p className="text-xs font-medium text-slate-500">{titel}</p><p className="mt-1 text-3xl font-bold text-slate-900">{wert === undefined ? "–" : wert.toLocaleString("de-DE")}</p></div>;
 }
 
-function UmsatzKarte({ titel, wert, farbe }: { titel: string; wert: number; farbe: "emerald" | "cyan" }) {
-  return <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><div><p className="text-xs font-medium text-slate-500">{titel}</p><p className={`mt-2 text-3xl font-bold ${farbe === "emerald" ? "text-emerald-600" : "text-cyan-600"}`}>{wert.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</p></div><div className={`rounded-xl p-3 ${farbe === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-cyan-50 text-cyan-600"}`}><CircleDollarSign className="h-6 w-6" /></div></div></div>;
+function UmsatzKarte({ titel, wert, farbe, anzahl, einheit, onClick }: { titel: string; wert: number; farbe: "emerald" | "cyan"; anzahl: number; einheit: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className={`group cursor-pointer rounded-xl border bg-white p-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg ${farbe === "emerald" ? "border-emerald-200 hover:border-emerald-500" : "border-cyan-200 hover:border-cyan-500"}`}><div className="flex items-center justify-between"><div><p className="text-xs font-medium text-slate-500">{titel}</p><p className={`mt-2 text-3xl font-bold ${farbe === "emerald" ? "text-emerald-600" : "text-cyan-600"}`}>{wert.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</p><p className="mt-2 text-xs text-slate-500">{anzahl} {einheit} · Details anzeigen</p></div><div className={`rounded-xl p-3 transition group-hover:scale-110 ${farbe === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-cyan-50 text-cyan-600"}`}><CircleDollarSign className="h-6 w-6" /></div></div></button>;
+}
+
+function UmsatzDetails({ typ, umsatz, schliessen }: { typ: "versendet" | "bezahlt"; umsatz: NonNullable<DashboardDaten["umsatz"]>; schliessen: () => void }) {
+  const versendet = typ === "versendet";
+  const eintraege = versendet ? umsatz.sendungen : umsatz.zahlungen;
+  return <div onMouseDown={(e) => e.target === e.currentTarget && schliessen()} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"><section className="max-h-[85vh] w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] shadow-2xl"><header className="flex items-center justify-between border-b border-[var(--nova-rand)] p-6"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-[var(--nova-akzent)]">Tagesdetails</p><h2 className="mt-1 text-2xl font-bold">{versendet ? "Heute versendet" : "Heute bezahlt"}</h2><p className={`mt-1 text-xl font-bold ${versendet ? "text-emerald-500" : "text-cyan-500"}`}>{(versendet ? umsatz.versendetHeute : umsatz.bezahltHeute).toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</p></div><button type="button" onClick={schliessen} className="rounded-xl border border-[var(--nova-rand)] p-3"><X className="h-5 w-5" /></button></header><div className="max-h-[65vh] space-y-3 overflow-auto p-6">{eintraege.length === 0 && <p className="rounded-xl border border-dashed border-[var(--nova-rand)] p-10 text-center text-[var(--nova-text-schwaecher)]">Heute sind noch keine Vorgänge vorhanden.</p>}{versendet ? umsatz.sendungen.map((s) => <article key={s.id} className="grid gap-3 rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-hintergrund)] p-5 md:grid-cols-[1.4fr_1fr_auto]"><div><b>{s.versandnummer} · {s.auftragsnummer}</b><p className="mt-1 text-sm text-[var(--nova-text-schwaecher)]">{s.kunde}</p><p className="mt-1 text-xs">Lieferschein: {s.lieferscheinnummer ?? "nicht vorhanden"}</p></div><div className="text-sm"><p>{s.versendetAm ? new Date(s.versendetAm).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "–"} Uhr</p><p className="text-[var(--nova-text-schwaecher)]">durch {s.versendetVon ?? "System"}</p></div><b className="text-xl text-emerald-500">{s.warenwert.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</b></article>) : umsatz.zahlungen.map((z) => <article key={z.id} className="grid gap-3 rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-hintergrund)] p-5 md:grid-cols-[1.4fr_1fr_auto]"><div><b>{z.rechnungsnummer} · {z.kunde}</b><p className="mt-1 text-sm text-[var(--nova-text-schwaecher)]">{z.betreff}</p><p className="mt-1 text-xs">Referenz: {z.referenz ?? "–"}</p></div><div className="text-sm"><p>{new Date(z.gebuchtAm).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })} Uhr · {z.zahlungsart}</p><p className="text-[var(--nova-text-schwaecher)]">gebucht von {z.gebuchtVon ?? "System"}</p></div><b className="text-xl text-cyan-500">{z.betrag.toLocaleString("de-DE", { style: "currency", currency: "EUR" })}</b></article>)}</div></section></div>;
 }
 
 function Aufgabe({ titel, wert, href }: { titel: string; wert?: number; href: string }) {
