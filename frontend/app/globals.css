@@ -174,9 +174,15 @@ html[data-theme="light"] .nova-enterprise-shell .nova-enterprise-content :is(tab
   box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
 }
 
-.nova-sidebar-scroll {
-  scrollbar-color: rgb(100 116 139 / 0.55) transparent;
-  scrollbar-width: thin;
+/* Scrollen bleibt per Mausrad, Touchpad, Touch und Tastatur möglich – ohne sichtbare Balken. */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .nova-enterprise-content input,

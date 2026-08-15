@@ -52,11 +52,51 @@ async function artikelGesamtbestandAktualisieren(artikelId: number) {
   }
 }
 
+async function umlagerungBestaetigen(id: number, benutzer: string) {
+  const bewegung = await prisma.lagerbewegung.findUnique({ where: { id } });
+  if (!bewegung || bewegung.typ !== "UMLAGERUNG" || bewegung.status !== "ERFASST") return;
+  if (!bewegung.vonLagerplatzId || !bewegung.nachLagerplatzId || bewegung.vonLagerplatzId === bewegung.nachLagerplatzId) {
+    throw new Error("Für die Umlagerung werden zwei unterschiedliche Lagerplätze benötigt.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    const quelle = await tx.lagerbestand.findUnique({
+      where: { artikelId_lagerplatzId: { artikelId: bewegung.artikelId, lagerplatzId: bewegung.vonLagerplatzId! } },
+    });
+    if (!quelle || quelle.menge < bewegung.menge) {
+      throw new Error("Am Ausgangslagerplatz ist nicht genügend Bestand vorhanden.");
+    }
+    await tx.lagerbestand.update({ where: { id: quelle.id }, data: { menge: { decrement: bewegung.menge } } });
+    await tx.lagerbestand.upsert({
+      where: { artikelId_lagerplatzId: { artikelId: bewegung.artikelId, lagerplatzId: bewegung.nachLagerplatzId! } },
+      create: { artikelId: bewegung.artikelId, lagerplatzId: bewegung.nachLagerplatzId!, menge: bewegung.menge },
+      update: { menge: { increment: bewegung.menge } },
+    });
+    await tx.lagerbewegung.update({
+      where: { id: bewegung.id },
+      data: { status: "BESTAETIGT", bestaetigtVon: benutzer, bestaetigtAm: new Date() },
+    });
+  });
+  await artikelGesamtbestandAktualisieren(bewegung.artikelId);
+}
+
 export async function GET() {
   try {
     const angemeldet = await aktuellerBenutzer();
     if (!angemeldet) return NextResponse.json({ fehler: "Anmeldung erforderlich." }, { status: 401 });
     await lagerplaetzeSicherstellen();
+
+    const offeneUmlagerungen = await prisma.lagerbewegung.findMany({
+      where: { typ: "UMLAGERUNG", status: "ERFASST" },
+      select: { id: true },
+    });
+    for (const umlagerung of offeneUmlagerungen) {
+      try {
+        await umlagerungBestaetigen(umlagerung.id, "NOVA Umlagerungsautomatik");
+      } catch (error) {
+        console.warn(`Offene Umlagerung ${umlagerung.id} konnte nicht automatisch bestätigt werden:`, error);
+      }
+    }
 
     const [lagerplaetze, bewegungen, inventuren, ladungstraeger] =
       await Promise.all([
@@ -189,6 +229,17 @@ export async function POST(request: NextRequest) {
           erfasstVon: benutzer,
         },
       });
+
+      if (bewegung.typ === "UMLAGERUNG") {
+        try {
+          await umlagerungBestaetigen(bewegung.id, benutzer);
+        } catch (error) {
+          await prisma.lagerbewegung.delete({ where: { id: bewegung.id } });
+          throw error;
+        }
+        const bestaetigteBewegung = await prisma.lagerbewegung.findUnique({ where: { id: bewegung.id } });
+        return NextResponse.json(bestaetigteBewegung, { status: 201 });
+      }
 
       return NextResponse.json(bewegung, { status: 201 });
     }
