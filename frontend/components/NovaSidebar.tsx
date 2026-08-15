@@ -21,6 +21,7 @@ import {
   Plug,
   Ruler,
   Settings,
+  Siren,
   ShieldCheck,
   ShoppingCart,
   Truck,
@@ -63,6 +64,7 @@ const gruppen: Gruppe[] = [
   { id: "integrationen", name: "Integrationen", href: "/admin/integrationen", icon: Plug, bereich: "administration", nurAdmin: true },
   { id: "sicherheit", name: "Sicherheit", href: "/admin/sicherheit", icon: LockKeyhole, bereich: "administration", nurAdmin: true },
   { id: "audit-trail", name: "Audit Trail", href: "/admin/audit-trail", icon: ShieldCheck, bereich: "administration", nurAdmin: true },
+  { id: "chaos-mode", name: "Chaos Mode", href: "/admin/chaos-mode", icon: Siren, bereich: "administration", nurAdmin: true },
 ];
 
 const bereiche = [
