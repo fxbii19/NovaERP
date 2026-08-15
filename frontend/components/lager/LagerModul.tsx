@@ -151,7 +151,27 @@ export default function LagerModul({ modus }: { modus: LagerModus }) {
           )}
 
           {!laedt && daten && modus === "lagerplaetze" && (
-            <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <>
+            <form onSubmit={async (event) => {
+              event.preventDefault();
+              const erfolgreich = await aktionSenden("lagerplatz-anlegen", {
+                code: formular.lagerplatzCode,
+                bezeichnung: formular.lagerplatzBezeichnung,
+                bereich: formular.lagerplatzBereich,
+                lagerplatzTyp: formular.lagerplatzTyp ?? "REGAL",
+              });
+              if (erfolgreich) setFormular((alt) => ({ ...alt, lagerplatzCode: "", lagerplatzBezeichnung: "", lagerplatzBereich: "", lagerplatzTyp: "REGAL" }));
+            }} className="mt-8 rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-6">
+              <div className="mb-5"><h2 className="text-xl font-semibold">Neuen Lagerplatz hinzufügen</h2><p className="mt-1 text-sm text-[var(--nova-text-schwaecher)]">Der Lagerplatz steht nach dem Speichern sofort für MDE, Inventur und Umlagerungen bereit.</p></div>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 xl:items-end">
+                <Feld label="Lagerplatzcode *" wert={formular.lagerplatzCode ?? ""} onChange={(wert) => setFormular((alt) => ({ ...alt, lagerplatzCode: wert.toUpperCase() }))} />
+                <Feld label="Bezeichnung *" wert={formular.lagerplatzBezeichnung ?? ""} onChange={(wert) => setFormular((alt) => ({ ...alt, lagerplatzBezeichnung: wert }))} />
+                <Feld label="Bereich *" wert={formular.lagerplatzBereich ?? ""} onChange={(wert) => setFormular((alt) => ({ ...alt, lagerplatzBereich: wert }))} />
+                <Auswahl label="Typ *" wert={formular.lagerplatzTyp ?? "REGAL"} onChange={(wert) => setFormular((alt) => ({ ...alt, lagerplatzTyp: wert }))} optionen={[["REGAL", "Regal"], ["BODEN", "Bodenplatz"], ["KLEINTEILE", "Kleinteile"], ["MDE-ZONE", "MDE-Zone"], ["VERSAND", "Versandfläche"], ["GESPERRT", "Sperrlager"]]} />
+                <PrimaerButton text="Lagerplatz anlegen" />
+              </div>
+            </form>
+            <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
               {daten.lagerplaetze.map((platz) => (
                 <div key={platz.id} className="rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-5">
                   <div className="flex items-start justify-between gap-3">
@@ -166,6 +186,7 @@ export default function LagerModul({ modus }: { modus: LagerModus }) {
                 </div>
               ))}
             </div>
+            </>
           )}
 
           {!laedt && daten && (modus === "mde" || modus === "umlagerungen") && (

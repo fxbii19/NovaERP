@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { aktuellerBenutzer } from "@/lib/auth-server";
+import { auditSpeichern } from "@/lib/audit";
 
 const DEMO_LAGERPLAETZE = [
   ["WE-BEK-01", "Wareneingang Bekleidung", "Wareneingang", "MDE-ZONE"],
@@ -103,6 +104,42 @@ export async function POST(request: NextRequest) {
     const benutzer = `${angemeldet.vorname} ${angemeldet.nachname}`.trim();
     const daten = await request.json();
     const aktion = String(daten.aktion ?? "");
+
+    if (aktion === "lagerplatz-anlegen") {
+      const code = String(daten.code ?? "").trim().toUpperCase().replace(/\s+/g, "-");
+      const bezeichnung = String(daten.bezeichnung ?? "").trim();
+      const bereich = String(daten.bereich ?? "").trim();
+      const typ = String(daten.lagerplatzTyp ?? "REGAL").trim().toUpperCase();
+      const erlaubteTypen = ["REGAL", "BODEN", "KLEINTEILE", "MDE-ZONE", "VERSAND", "GESPERRT"];
+
+      if (!code || !/^[A-Z0-9ÄÖÜ_-]{2,30}$/.test(code)) {
+        return NextResponse.json({ fehler: "Der Lagerplatzcode muss 2 bis 30 Zeichen lang sein und darf Buchstaben, Zahlen, Bindestriche oder Unterstriche enthalten." }, { status: 400 });
+      }
+      if (!bezeichnung || !bereich) {
+        return NextResponse.json({ fehler: "Bezeichnung und Bereich sind erforderlich." }, { status: 400 });
+      }
+      if (!erlaubteTypen.includes(typ)) {
+        return NextResponse.json({ fehler: "Der Lagerplatztyp ist ungültig." }, { status: 400 });
+      }
+      if (await prisma.lagerplatz.findUnique({ where: { code } })) {
+        return NextResponse.json({ fehler: `Der Lagerplatz ${code} ist bereits vorhanden.` }, { status: 409 });
+      }
+
+      const lagerplatz = await prisma.lagerplatz.create({
+        data: { code, bezeichnung, bereich, typ },
+      });
+      await auditSpeichern({
+        modul: "Lager",
+        aktion: "Lagerplatz angelegt",
+        benutzer,
+        objektTyp: "Lagerplatz",
+        objektId: lagerplatz.id,
+        alterWert: null,
+        neuerWert: lagerplatz,
+        grund: "Erweiterung der Lagerstruktur",
+      });
+      return NextResponse.json(lagerplatz, { status: 201 });
+    }
 
     if (aktion === "mde-erfassen") {
       const artikel = await prisma.artikel.findUnique({
