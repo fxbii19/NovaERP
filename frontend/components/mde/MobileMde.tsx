@@ -9,7 +9,7 @@ type Lagerplatz = { id: number; code: string; bezeichnung: string };
 type Ladungstraeger = { id: number; barcode: string; bezeichnung: string };
 type Bewegung = { id: number; typ: string; status: string; menge: number; erfasstAm: string; erfasstVon: string | null; artikel: Artikel; vonLagerplatz: Lagerplatz | null; nachLagerplatz: Lagerplatz | null };
 type LagerDaten = { lagerplaetze: Lagerplatz[]; ladungstraeger: Ladungstraeger[]; bewegungen: Bewegung[] };
-type Bestellposition = { position: number; artikelnummer: string; bezeichnung: string; menge: number };
+type Bestellposition = { position: number; artikelnummer: string; bezeichnung: string; menge: number; erfasstMenge: number; restMenge: number; erfassungsstatus: "OFFEN" | "TEILWEISE" | "VOLLSTAENDIG" };
 type Bestellung = { id: number; bestellnummer: string; lieferscheinnummer: string | null; lieferant: string; status: string; positionen: Bestellposition[] };
 type ScanErgebnis = { rawValue: string };
 type Detector = { detect: (quelle: ImageBitmapSource) => Promise<ScanErgebnis[]> };
@@ -20,6 +20,7 @@ export default function MobileMde() {
   const [artikel, setArtikel] = useState<Artikel[]>([]);
   const [bestellungen, setBestellungen] = useState<Bestellung[]>([]);
   const [offeneBestellung, setOffeneBestellung] = useState<number | null>(null);
+  const [ausgewaehltePosition, setAusgewaehltePosition] = useState<{ bestellungId: number; position: number } | null>(null);
   const [typ, setTyp] = useState("EINGANG");
   const [artikelnummer, setArtikelnummer] = useState("");
   const [menge, setMenge] = useState("1");
@@ -54,7 +55,10 @@ export default function MobileMde() {
       if (!bestellAntwort.ok) throw new Error(bestellDaten.fehler || "Bestellungen konnten nicht geladen werden.");
       setDaten(lagerDaten);
       setArtikel(Array.isArray(artikelDaten) ? artikelDaten : []);
-      setBestellungen(Array.isArray(bestellDaten) ? bestellDaten.filter((bestellung: Bestellung) => bestellung.status === "Offen") : []);
+      setBestellungen(Array.isArray(bestellDaten) ? bestellDaten
+        .filter((bestellung: Bestellung) => bestellung.status === "Offen")
+        .map((bestellung: Bestellung) => ({ ...bestellung, positionen: bestellung.positionen.filter((position) => position.restMenge > 0) }))
+        .filter((bestellung: Bestellung) => bestellung.positionen.length > 0) : []);
       setSynchronisiertAm(new Date());
       setOnline(true);
     } catch (error) {
@@ -76,7 +80,7 @@ export default function MobileMde() {
   const scanVerarbeiten = useCallback((rohwert: string) => {
     const wert = rohwert.trim();
     if (!wert) return;
-    setScanText(wert); setFehler("");
+    setScanText(wert); setFehler(""); setAusgewaehltePosition(null);
 
     try {
       if (wert.startsWith("{")) {
@@ -143,22 +147,23 @@ export default function MobileMde() {
   async function buchen(event: FormEvent) {
     event.preventDefault(); setSendet(true); setFehler(""); setMeldung("");
     try {
-      const antwort = await fetch("/api/lager", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "mde-erfassen", typ, artikelnummer, menge, vonLagerplatzId: von || null, nachLagerplatzId: nach || null, ladungstraegerCode: ladungstraeger || null, notiz: "Mobile MDE-Erfassung" }) });
+      const antwort = await fetch("/api/lager", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ aktion: "mde-erfassen", typ, artikelnummer, menge, vonLagerplatzId: von || null, nachLagerplatzId: nach || null, ladungstraegerCode: ladungstraeger || null, bestellungId: ausgewaehltePosition?.bestellungId ?? null, bestellposition: ausgewaehltePosition?.position ?? null, notiz: "Mobile MDE-Erfassung" }) });
       const ergebnis = await antwort.json();
       if (!antwort.ok) throw new Error(ergebnis.fehler || "Buchung fehlgeschlagen.");
       setMeldung("MDE-Vorgang wurde erfasst und an die PC-Bestätigung gesendet.");
-      setArtikelnummer(""); setMenge("1"); setScanText("");
+      setArtikelnummer(""); setMenge("1"); setScanText(""); setAusgewaehltePosition(null);
       await laden(false);
     } catch (error) { setFehler(error instanceof Error ? error.message : "Buchung fehlgeschlagen."); }
     finally { setSendet(false); }
   }
 
   const letzte = daten?.bewegungen.slice(0, 8) ?? [];
-  function positionUebernehmen(position: Bestellposition) {
+  function positionUebernehmen(bestellungId: number, position: Bestellposition) {
     setTyp("EINGANG");
     setArtikelnummer(position.artikelnummer);
-    setMenge(String(position.menge));
-    setMeldung(`${position.artikelnummer} mit ${position.menge} Stück wurde übernommen.`);
+    setMenge(String(position.restMenge));
+    setAusgewaehltePosition({ bestellungId, position: position.position });
+    setMeldung(`${position.artikelnummer}: Restmenge ${position.restMenge} Stück wurde übernommen.`);
     setFehler("");
   }
 
@@ -184,8 +189,8 @@ export default function MobileMde() {
                 <ChevronDown className={`ml-auto h-4 w-4 shrink-0 transition-transform ${istOffen ? "rotate-180" : ""}`} />
               </button>
               {istOffen && <div className="space-y-2 border-t border-[var(--nova-rand)] p-3">
-                {bestellung.positionen.map((position) => <button type="button" key={position.position} onClick={() => positionUebernehmen(position)} className="flex w-full items-center justify-between gap-3 rounded-lg bg-[var(--nova-hintergrund)] p-3 text-left transition hover:ring-1 hover:ring-[var(--nova-akzent)]">
-                  <div><b className="text-[var(--nova-akzent)]">{position.artikelnummer}</b><p className="mt-1 text-xs text-[var(--nova-text-schwaecher)]">{position.bezeichnung}</p></div><span className="shrink-0 font-semibold">{position.menge} Stk.</span>
+                {bestellung.positionen.map((position) => <button type="button" key={position.position} onClick={() => positionUebernehmen(bestellung.id, position)} className="flex w-full items-center justify-between gap-3 rounded-lg bg-[var(--nova-hintergrund)] p-3 text-left transition hover:ring-1 hover:ring-[var(--nova-akzent)]">
+                  <div><b className="text-[var(--nova-akzent)]">{position.artikelnummer}</b><p className="mt-1 text-xs text-[var(--nova-text-schwaecher)]">{position.bezeichnung}</p>{position.erfasstMenge > 0 && <p className="mt-1 text-xs text-amber-400">Teilweise erfasst: {position.erfasstMenge} von {position.menge} Stk.</p>}</div><span className="shrink-0 font-semibold">Rest {position.restMenge} Stk.</span>
                 </button>)}
               </div>}
             </div>;
@@ -203,7 +208,7 @@ export default function MobileMde() {
 
       <form onSubmit={buchen} className="space-y-4 rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-5">
         <div className="grid grid-cols-3 gap-2">{[["EINGANG", "Eingang"], ["AUSGANG", "Ausgang"], ["UMLAGERUNG", "Umlagerung"]].map(([wert, text]) => <button key={wert} type="button" onClick={() => setTyp(wert)} className={`rounded-xl px-2 py-3 text-sm font-semibold transition ${typ === wert ? "bg-[var(--nova-akzent)] text-white" : "bg-[var(--nova-hintergrund)] text-[var(--nova-text-schwaecher)]"}`}>{text}</button>)}</div>
-        <MdeFeld label="Artikelnummer / Barcode" wert={artikelnummer} setzen={setArtikelnummer} />
+        <MdeFeld label="Artikelnummer / Barcode" wert={artikelnummer} setzen={(wert) => { setArtikelnummer(wert); setAusgewaehltePosition(null); }} />
         <MdeFeld label="Menge" wert={menge} setzen={setMenge} typ="number" />
         {(typ === "AUSGANG" || typ === "UMLAGERUNG") && <MdeAuswahl label="Von Lagerplatz" wert={von} setzen={setVon} plaetze={daten?.lagerplaetze ?? []} />}
         {(typ === "EINGANG" || typ === "UMLAGERUNG") && <MdeAuswahl label="Nach Lagerplatz" wert={nach} setzen={setNach} plaetze={daten?.lagerplaetze ?? []} />}

@@ -121,6 +121,23 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ fehler: "Die Menge muss größer als 0 sein." }, { status: 400 });
       }
 
+      const bestellungId = Number(daten.bestellungId);
+      const bestellposition = Number(daten.bestellposition);
+      const istBestellposition = String(daten.typ ?? "EINGANG") === "EINGANG"
+        && Number.isInteger(bestellungId) && bestellungId > 0
+        && Number.isInteger(bestellposition) && bestellposition > 0;
+
+      if (istBestellposition) {
+        const bestellung = await prisma.bestellung.findUnique({ where: { id: bestellungId } });
+        const sollPosition = bestellung
+          ? (await import("@/lib/demo-bestellpositionen")).demoBestellpositionen(bestellung.id, bestellung.gesamtpositionen)
+              .find((position) => position.position === bestellposition)
+          : null;
+        if (!bestellung || !sollPosition || sollPosition.artikelnummer !== artikel.artikelnummer) {
+          return NextResponse.json({ fehler: "Die ausgewählte Bestellposition ist nicht mehr gültig. Bitte neu öffnen." }, { status: 400 });
+        }
+      }
+
       const bewegung = await prisma.lagerbewegung.create({
         data: {
           typ: String(daten.typ ?? "EINGANG"),
@@ -129,7 +146,9 @@ export async function POST(request: NextRequest) {
           vonLagerplatzId: daten.vonLagerplatzId ? Number(daten.vonLagerplatzId) : null,
           nachLagerplatzId: daten.nachLagerplatzId ? Number(daten.nachLagerplatzId) : null,
           ladungstraegerCode: String(daten.ladungstraegerCode ?? "").trim() || null,
-          notiz: String(daten.notiz ?? "").trim() || null,
+          notiz: istBestellposition
+            ? `MDE-BESTELLPOSITION:${bestellungId}:${bestellposition} | Mobile MDE-Erfassung`
+            : String(daten.notiz ?? "").trim() || null,
           erfasstVon: benutzer,
         },
       });

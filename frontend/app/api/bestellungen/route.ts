@@ -6,16 +6,48 @@ import { demoBestellpositionen } from "@/lib/demo-bestellpositionen";
 
 export async function GET() {
   try {
-    const bestellungen = await prisma.bestellung.findMany({
-      orderBy: { erstelltAm: "desc" },
-    });
+    const [bestellungen, mdeErfassungen] = await Promise.all([
+      prisma.bestellung.findMany({ orderBy: { erstelltAm: "desc" } }),
+      prisma.lagerbewegung.findMany({
+        where: { typ: "EINGANG", notiz: { startsWith: "MDE-BESTELLPOSITION:" } },
+        select: { menge: true, notiz: true, erfasstAm: true },
+      }),
+    ]);
+
+    const erfassteMengen = new Map<string, { menge: number; zuletztErfasstAm: Date }>();
+    for (const erfassung of mdeErfassungen) {
+      const treffer = erfassung.notiz?.match(/^MDE-BESTELLPOSITION:(\d+):(\d+)/);
+      if (!treffer) continue;
+      const schluessel = `${treffer[1]}:${treffer[2]}`;
+      const bisher = erfassteMengen.get(schluessel);
+      erfassteMengen.set(schluessel, {
+        menge: (bisher?.menge ?? 0) + erfassung.menge,
+        zuletztErfasstAm: bisher && bisher.zuletztErfasstAm > erfassung.erfasstAm
+          ? bisher.zuletztErfasstAm
+          : erfassung.erfasstAm,
+      });
+    }
+
     return NextResponse.json(
       bestellungen.map((bestellung) => ({
         ...bestellung,
         positionen: demoBestellpositionen(
           bestellung.id,
           bestellung.gesamtpositionen,
-        ),
+        ).map((position) => {
+          const erfassung = erfassteMengen.get(`${bestellung.id}:${position.position}`);
+          const erfasstMenge = erfassung?.menge ?? 0;
+          const restMenge = Math.max(0, position.menge - erfasstMenge);
+          return {
+            ...position,
+            erfasstMenge,
+            restMenge,
+            erfassungsstatus: restMenge === 0
+              ? "VOLLSTAENDIG"
+              : erfasstMenge > 0 ? "TEILWEISE" : "OFFEN",
+            zuletztErfasstAm: erfassung?.zuletztErfasstAm ?? null,
+          };
+        }),
       })),
     );
   } catch (error) {

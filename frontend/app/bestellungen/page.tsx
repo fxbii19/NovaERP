@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import NovaSidebar from "@/components/NovaSidebar";
 
-type Bestellung = { id: number; bestellnummer: string; lieferscheinnummer: string | null; lieferant: string; status: string; gesamtpositionen: number; erstelltAm: string };
+type Bestellposition = { position: number; artikelnummer: string; bezeichnung: string; menge: number; erfasstMenge: number; restMenge: number; erfassungsstatus: "OFFEN" | "TEILWEISE" | "VOLLSTAENDIG"; zuletztErfasstAm: string | null };
+type Bestellung = { id: number; bestellnummer: string; lieferscheinnummer: string | null; lieferant: string; status: string; gesamtpositionen: number; erstelltAm: string; positionen: Bestellposition[] };
 
 export default function BestellungenSeite() {
   const [bestellungen, setBestellungen] = useState<Bestellung[]>([]);
@@ -93,22 +94,18 @@ export default function BestellungenSeite() {
 
 function BestellDetails({ bestellung, startAnsicht, onSchliessen }: { bestellung: Bestellung; startAnsicht: "bestellung" | "lieferschein"; onSchliessen: () => void }) {
   const [ansicht, setAnsicht] = useState(startAnsicht);
-  const positionen = Array.from({ length: Math.max(1, bestellung.gesamtpositionen) }, (_, index) => ({
-    position: index + 1,
-    artikelnummer: `DEMO-EK-${String(bestellung.id).padStart(3, "0")}-${String(index + 1).padStart(2, "0")}`,
-    bezeichnung: ["Arbeitsjacke Nova Pro", "Schutzhandschuh Flex", "Sicherheitsschuh Motion", "Verpackungseinheit Standard"][index % 4],
-    menge: 12 + ((bestellung.id + index) * 7) % 89,
-  }));
+  const positionen = bestellung.positionen;
+  const offenePositionen = positionen.filter((position) => position.erfassungsstatus !== "VOLLSTAENDIG").length;
 
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm" onMouseDown={onSchliessen}>
     <section onMouseDown={(event) => event.stopPropagation()} className="max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-3xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-7 shadow-2xl">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex gap-2"><button type="button" onClick={() => setAnsicht("bestellung")} className={`rounded-xl px-4 py-2 font-semibold transition ${ansicht === "bestellung" ? "bg-[var(--nova-akzent)] text-white" : "border border-[var(--nova-rand)] hover:bg-[var(--nova-flaeche-hover)]"}`}>Bestellung</button><button type="button" onClick={() => setAnsicht("lieferschein")} className={`rounded-xl px-4 py-2 font-semibold transition ${ansicht === "lieferschein" ? "bg-[var(--nova-akzent)] text-white" : "border border-[var(--nova-rand)] hover:bg-[var(--nova-flaeche-hover)]"}`}>Papier-Lieferschein</button></div><button type="button" onClick={onSchliessen} className="rounded-xl border border-[var(--nova-rand)] px-4 py-2 transition hover:bg-[var(--nova-flaeche-hover)]">Schließen</button></div>
-      {ansicht === "bestellung" ? <><div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--nova-akzent)]">Einkaufsbeleg</p><h2 className="mt-2 text-3xl font-bold">{bestellung.bestellnummer}</h2><p className="mt-2 text-[var(--nova-text-schwaecher)]">Lieferant: {bestellung.lieferant}</p></div><div className="mt-6 grid gap-4 sm:grid-cols-3"><BelegInfo titel="Lieferschein" wert={bestellung.lieferscheinnummer ?? "Nicht vorhanden"} /><BelegInfo titel="Status" wert={bestellung.status} /><BelegInfo titel="Bestelldatum" wert={new Date(bestellung.erstelltAm).toLocaleDateString("de-DE")} /></div><PositionsTabelle positionen={positionen} papier={false} /><p className="mt-5 text-sm text-[var(--nova-text-schwaecher)]">Demo-Daten für die NOVA-Präsentation. Die Positionen werden später durch echte Bestellpositionen ersetzt.</p></> : <PapierLieferschein bestellung={bestellung} positionen={positionen} />}
+      {ansicht === "bestellung" ? <><div><p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--nova-akzent)]">Einkaufsbeleg</p><h2 className="mt-2 text-3xl font-bold">{bestellung.bestellnummer}</h2><p className="mt-2 text-[var(--nova-text-schwaecher)]">Lieferant: {bestellung.lieferant}</p></div><div className="mt-6 grid gap-4 sm:grid-cols-3"><BelegInfo titel="Lieferschein" wert={bestellung.lieferscheinnummer ?? "Nicht vorhanden"} /><BelegInfo titel="Status" wert={bestellung.status} /><BelegInfo titel="Bestelldatum" wert={new Date(bestellung.erstelltAm).toLocaleDateString("de-DE")} /></div>{offenePositionen > 0 ? <div className="mt-6 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 text-amber-300"><b>Achtung: {offenePositionen} {offenePositionen === 1 ? "Position wurde" : "Positionen wurden"} noch nicht vollständig erfasst.</b><p className="mt-1 text-sm">Die fehlenden Mengen sind in der Tabelle rot bzw. gelb markiert.</p></div> : <div className="mt-6 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-emerald-300"><b>Alle Bestellpositionen wurden vollständig am MDE erfasst.</b></div>}<PositionsTabelle positionen={positionen} papier={false} /><p className="mt-5 text-sm text-[var(--nova-text-schwaecher)]">Demo-Daten für die NOVA-Präsentation. Die Positionen werden später durch echte Bestellpositionen ersetzt.</p></> : <PapierLieferschein bestellung={bestellung} positionen={positionen} />}
     </section>
   </div>;
 }
 
-function PapierLieferschein({ bestellung, positionen }: { bestellung: Bestellung; positionen: Array<{ position: number; artikelnummer: string; bezeichnung: string; menge: number }> }) {
+function PapierLieferschein({ bestellung, positionen }: { bestellung: Bestellung; positionen: Bestellposition[] }) {
   return <div className="relative mx-auto min-h-[900px] max-w-[760px] bg-white p-12 text-slate-900 shadow-2xl">
     <a href={`/api/dokumente/lieferschein/${bestellung.id}`} target="_blank" rel="noreferrer" className="absolute right-4 top-4 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700">PDF öffnen</a>
     <div className="flex items-start justify-between border-b-2 border-emerald-600 pb-7"><div><p className="text-3xl font-black tracking-tight text-emerald-600">NOVA DEMO SUPPLY</p><p className="mt-2 text-sm text-slate-500">Industriestraße 24 · 10115 Berlin</p><p className="text-sm text-slate-500">Tel. +49 30 555 010 · lieferung@nova-demo.de</p></div><div className="text-right"><h2 className="text-3xl font-light uppercase tracking-wider">Lieferschein</h2><p className="mt-3 font-bold">{bestellung.lieferscheinnummer}</p></div></div>
@@ -120,8 +117,14 @@ function PapierLieferschein({ bestellung, positionen }: { bestellung: Bestellung
   </div>;
 }
 
-function PositionsTabelle({ positionen, papier }: { positionen: Array<{ position: number; artikelnummer: string; bezeichnung: string; menge: number }>; papier: boolean }) {
-  return <div className={`mt-8 overflow-hidden border ${papier ? "border-slate-300" : "rounded-2xl border-[var(--nova-rand)]"}`}><table className="w-full text-sm"><thead className={papier ? "bg-slate-100" : "bg-[var(--nova-hintergrund)]"}><tr>{["Position", "Artikelnummer", "Bezeichnung", "Menge"].map((titel) => <th key={titel} className="px-5 py-4 text-left">{titel}</th>)}</tr></thead><tbody>{positionen.map((position) => <tr key={position.position} className={papier ? "border-t border-slate-200" : "border-t border-[var(--nova-rand)]"}><td className="px-5 py-4">{position.position}</td><td className={`px-5 py-4 ${papier ? "font-medium" : "text-[var(--nova-akzent)]"}`}>{position.artikelnummer}</td><td className="px-5 py-4">{position.bezeichnung}</td><td className="px-5 py-4">{position.menge} Stk.</td></tr>)}</tbody></table></div>;
+function PositionsTabelle({ positionen, papier }: { positionen: Bestellposition[]; papier: boolean }) {
+  const spalten = papier ? ["Position", "Artikelnummer", "Bezeichnung", "Menge"] : ["Position", "Artikelnummer", "Bezeichnung", "Bestellt", "Erfasst", "Fehlt", "MDE-Status"];
+  return <div className={`mt-8 overflow-x-auto border ${papier ? "border-slate-300" : "rounded-2xl border-[var(--nova-rand)]"}`}><table className="w-full text-sm"><thead className={papier ? "bg-slate-100" : "bg-[var(--nova-hintergrund)]"}><tr>{spalten.map((titel) => <th key={titel} className="whitespace-nowrap px-5 py-4 text-left">{titel}</th>)}</tr></thead><tbody>{positionen.map((position) => <tr key={position.position} className={papier ? "border-t border-slate-200" : "border-t border-[var(--nova-rand)]"}><td className="px-5 py-4">{position.position}</td><td className={`px-5 py-4 ${papier ? "font-medium" : "text-[var(--nova-akzent)]"}`}>{position.artikelnummer}</td><td className="px-5 py-4">{position.bezeichnung}</td><td className="whitespace-nowrap px-5 py-4">{position.menge} Stk.</td>{!papier && <><td className="whitespace-nowrap px-5 py-4 text-emerald-300">{position.erfasstMenge} Stk.</td><td className={`whitespace-nowrap px-5 py-4 font-bold ${position.restMenge > 0 ? "text-red-300" : "text-emerald-300"}`}>{position.restMenge} Stk.</td><td className="px-5 py-4"><Erfassungsstatus status={position.erfassungsstatus} /></td></>}</tr>)}</tbody></table></div>;
+}
+
+function Erfassungsstatus({ status }: { status: Bestellposition["erfassungsstatus"] }) {
+  const daten = status === "VOLLSTAENDIG" ? ["Vollständig", "bg-emerald-500/15 text-emerald-300"] : status === "TEILWEISE" ? ["Teilweise", "bg-amber-500/15 text-amber-300"] : ["Nicht erfasst", "bg-red-500/15 text-red-300"];
+  return <span className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${daten[1]}`}>{daten[0]}</span>;
 }
 
 function BelegInfo({ titel, wert }: { titel: string; wert: string }) {
