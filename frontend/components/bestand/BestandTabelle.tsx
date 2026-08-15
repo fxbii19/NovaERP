@@ -21,6 +21,7 @@ export type DatenbankArtikel = {
   mindestbestand: number;
   lagerortverwaltung: boolean;
   aktiv: boolean;
+  ladungstraegerAnzahl: number;
 };
 
 type BestandTabelleProps = {
@@ -48,6 +49,7 @@ const SPALTEN = [
   { id: "verfuegbar", titel: "Verfügbar", rechts: true },
   { id: "bestellt", titel: "Bestellt", rechts: true },
   { id: "inAuftrag", titel: "In Auftrag", rechts: true },
+  { id: "ladungstraegerAnzahl", titel: "Ladungsträger", rechts: true },
   {
     id: "mindestbestand",
     titel: "Mindestbestand",
@@ -77,6 +79,7 @@ const STANDARD_SPALTENBREITEN: Record<SpaltenId, number> = {
   verfuegbar: 130,
   bestellt: 120,
   inAuftrag: 130,
+  ladungstraegerAnzahl: 150,
   mindestbestand: 150,
   lagerortverwaltung: 180,
 };
@@ -184,6 +187,15 @@ function ArtikelZelle({
       return (
         <td className="whitespace-nowrap px-5 py-4 text-right text-[var(--nova-text)]">
           {zahlFormatieren(eintrag.inAuftrag)}
+        </td>
+      );
+
+    case "ladungstraegerAnzahl":
+      return (
+        <td className="whitespace-nowrap px-5 py-4 text-right text-[var(--nova-text)]">
+          <span className="rounded-full bg-[var(--nova-akzent-transparent)] px-3 py-1 font-semibold text-[var(--nova-akzent)]">
+            {eintrag.ladungstraegerAnzahl.toLocaleString("de-DE")}
+          </span>
         </td>
       );
 
@@ -1110,6 +1122,43 @@ function ArtikelDialog({
   onSchliessen: () => void;
   onSpeichern: () => void;
 }) {
+  type TraegerDaten = {
+    lagerplatz: { code: string; bezeichnung: string } | null;
+    gesamtmenge: number;
+    ladungstraegerGesamt: number;
+    ladungstraeger: { barcode: string; menge: number }[];
+  };
+  const [traegerDaten, setTraegerDaten] = useState<TraegerDaten | null>(null);
+  const [traegerFehler, setTraegerFehler] = useState("");
+  const [traegerLaedt, setTraegerLaedt] = useState(false);
+
+  useEffect(() => {
+    if (!artikel) {
+      setTraegerDaten(null);
+      return;
+    }
+
+    let aktiv = true;
+    setTraegerLaedt(true);
+    setTraegerFehler("");
+    fetch(`/api/lager/ladungstraeger?artikelId=${artikel.id}`, { cache: "no-store" })
+      .then(async (antwort) => {
+        const daten = await antwort.json();
+        if (!antwort.ok) throw new Error(daten.fehler || "Ladungsträger konnten nicht geladen werden.");
+        if (aktiv) setTraegerDaten(daten);
+      })
+      .catch((error) => {
+        if (aktiv) setTraegerFehler(error instanceof Error ? error.message : "Ladungsträger konnten nicht geladen werden.");
+      })
+      .finally(() => {
+        if (aktiv) setTraegerLaedt(false);
+      });
+
+    return () => {
+      aktiv = false;
+    };
+  }, [artikel]);
+
   const mehrfach = mehrfachAnzahl > 0;
   const felder = mehrfach
     ? [["mindestbestand", "Mindestbestand"]]
@@ -1175,6 +1224,44 @@ function ArtikelDialog({
             </div>
           )}
         </div>
+
+        {!mehrfach && artikel && (
+          <section className="mx-6 mb-6 overflow-hidden rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-hintergrund)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--nova-rand)] px-4 py-3">
+              <div>
+                <h3 className="font-semibold text-[var(--nova-text)]">Ladungsträger</h3>
+                <p className="text-xs text-[var(--nova-text-schwaecher)]">
+                  Maximal 50 Stück je Träger · mit MDE scanbar
+                </p>
+              </div>
+              {traegerDaten && (
+                <div className="text-right text-sm">
+                  <b className="text-[var(--nova-akzent)]">{traegerDaten.ladungstraegerGesamt} Träger</b>
+                  <p className="text-xs text-[var(--nova-text-schwaecher)]">
+                    {zahlFormatieren(traegerDaten.gesamtmenge)} Stk. · {traegerDaten.lagerplatz?.code ?? "Kein Lagerplatz"}
+                  </p>
+                </div>
+              )}
+            </div>
+            {traegerLaedt && <p className="p-4 text-sm text-[var(--nova-text-schwaecher)]">Ladungsträger werden geladen …</p>}
+            {traegerFehler && <p className="p-4 text-sm text-red-400">{traegerFehler}</p>}
+            {traegerDaten && (
+              <div className="max-h-56 overflow-y-auto p-3">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {traegerDaten.ladungstraeger.map((traeger) => (
+                    <div key={traeger.barcode} className="flex items-center justify-between rounded-lg border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] px-3 py-2 text-sm">
+                      <code className="text-[var(--nova-akzent)]">{traeger.barcode}</code>
+                      <b>{zahlFormatieren(traeger.menge)} Stk.</b>
+                    </div>
+                  ))}
+                </div>
+                {traegerDaten.ladungstraeger.length === 0 && (
+                  <p className="p-3 text-center text-sm text-[var(--nova-text-schwaecher)]">Für diesen Artikel ist kein physischer Bestand vorhanden.</p>
+                )}
+              </div>
+            )}
+          </section>
+        )}
 
         {fehler && <p className="mx-6 mb-4 rounded-xl bg-red-950/50 p-3 text-sm text-red-300">{fehler}</p>}
 

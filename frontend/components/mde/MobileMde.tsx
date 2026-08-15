@@ -7,6 +7,13 @@ import { Camera, CheckCircle2, ChevronDown, ClipboardList, Keyboard, RefreshCw, 
 type Artikel = { id: number; artikelnummer: string; produktname: string };
 type Lagerplatz = { id: number; code: string; bezeichnung: string };
 type Ladungstraeger = { id: number; barcode: string; bezeichnung: string };
+type GescannterLadungstraeger = {
+  barcode: string;
+  lagerplatz: Lagerplatz | null;
+  traegerIndex?: number;
+  traegerGesamt?: number;
+  positionen: { artikel: Artikel & { groesse?: string | null; variante?: string | null }; menge: number }[];
+};
 type Bewegung = { id: number; typ: string; status: string; menge: number; erfasstAm: string; erfasstVon: string | null; artikel: Artikel; vonLagerplatz: Lagerplatz | null; nachLagerplatz: Lagerplatz | null };
 type LagerDaten = { lagerplaetze: Lagerplatz[]; ladungstraeger: Ladungstraeger[]; bewegungen: Bewegung[] };
 type Bestellposition = { position: number; artikelnummer: string; bezeichnung: string; menge: number; erfasstMenge: number; restMenge: number; erfassungsstatus: "OFFEN" | "TEILWEISE" | "VOLLSTAENDIG" };
@@ -27,6 +34,7 @@ export default function MobileMde() {
   const [von, setVon] = useState("");
   const [nach, setNach] = useState("");
   const [ladungstraeger, setLadungstraeger] = useState("");
+  const [gescannterTraeger, setGescannterTraeger] = useState<GescannterLadungstraeger | null>(null);
   const [scanText, setScanText] = useState("");
   const [meldung, setMeldung] = useState("");
   const [fehler, setFehler] = useState("");
@@ -77,7 +85,7 @@ export default function MobileMde() {
     return () => { window.clearInterval(intervall); window.removeEventListener("online", onlineSetzen); window.removeEventListener("offline", offlineSetzen); };
   }, [laden]);
 
-  const scanVerarbeiten = useCallback((rohwert: string) => {
+  const scanVerarbeiten = useCallback(async (rohwert: string) => {
     const wert = rohwert.trim();
     if (!wert) return;
     setScanText(wert); setFehler(""); setAusgewaehltePosition(null);
@@ -98,6 +106,28 @@ export default function MobileMde() {
     } catch { /* Normalen Barcode weiter prüfen. */ }
 
     const bereinigt = wert.replace(/^(ART|ARTICLE|LP|LOC|LT|CARRIER):/i, "").trim();
+    if (/^NOVA-LT-/i.test(bereinigt)) {
+      try {
+        const antwort = await fetch(`/api/lager/ladungstraeger?barcode=${encodeURIComponent(bereinigt)}`, { cache: "no-store" });
+        const traegerDaten = await antwort.json();
+        if (!antwort.ok) throw new Error(traegerDaten.fehler || "Ladungsträger wurde nicht gefunden.");
+        setGescannterTraeger(traegerDaten);
+        setLadungstraeger(traegerDaten.barcode);
+        const position = traegerDaten.positionen?.[0];
+        if (position) {
+          setArtikelnummer(position.artikel.artikelnummer);
+          setMenge(String(position.menge));
+        }
+        if (traegerDaten.lagerplatz) {
+          typ === "AUSGANG" ? setVon(String(traegerDaten.lagerplatz.id)) : setNach(String(traegerDaten.lagerplatz.id));
+        }
+        setMeldung(`Ladungsträger ${traegerDaten.barcode} erkannt.`);
+      } catch (error) {
+        setGescannterTraeger(null);
+        setFehler(error instanceof Error ? error.message : "Ladungsträger konnte nicht gelesen werden.");
+      }
+      return;
+    }
     const gefundenerArtikel = artikel.find((a) => a.artikelnummer.toLowerCase() === bereinigt.toLowerCase());
     if (gefundenerArtikel) { setArtikelnummer(gefundenerArtikel.artikelnummer); setMeldung(`Artikel ${gefundenerArtikel.artikelnummer} erkannt.`); return; }
     const platz = daten?.lagerplaetze.find((p) => p.code.toLowerCase() === bereinigt.toLowerCase());
@@ -133,7 +163,7 @@ export default function MobileMde() {
           erkenntRef.current = true;
           try {
             const treffer = await detector.detect(videoRef.current);
-            if (treffer[0]?.rawValue) { scanVerarbeiten(treffer[0].rawValue); kameraStoppen(); return; }
+            if (treffer[0]?.rawValue) { void scanVerarbeiten(treffer[0].rawValue); kameraStoppen(); return; }
           } catch { /* Nächsten Frame versuchen. */ } finally { erkenntRef.current = false; }
         }
         frameRef.current = requestAnimationFrame(erkennen);
@@ -173,6 +203,11 @@ export default function MobileMde() {
       <div className="flex items-center justify-between rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] px-4 py-3 text-xs text-[var(--nova-text-schwaecher)]"><span>{synchronisiertAm ? `Synchronisiert ${synchronisiertAm.toLocaleTimeString("de-DE")}` : "Synchronisierung läuft …"}</span><button onClick={() => void laden()} className="flex items-center gap-2 text-[var(--nova-akzent)]"><RefreshCw className="h-4 w-4" /> Aktualisieren</button></div>
       {meldung && <div className="flex gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-400"><CheckCircle2 className="h-5 w-5 shrink-0" />{meldung}</div>}
       {fehler && <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-400">{fehler}</div>}
+      {gescannterTraeger && <section className="rounded-2xl border border-[var(--nova-akzent)]/50 bg-[var(--nova-flaeche)] p-4">
+        <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-semibold uppercase tracking-wide text-[var(--nova-akzent)]">Ladungsträger erkannt</p><h2 className="mt-1 font-bold">{gescannterTraeger.barcode}</h2></div><button type="button" onClick={() => setGescannterTraeger(null)} className="rounded-lg border border-[var(--nova-rand)] p-2"><X className="h-4 w-4" /></button></div>
+        <p className="mt-3 text-sm text-[var(--nova-text-schwaecher)]">Lagerplatz: <b className="text-[var(--nova-text)]">{gescannterTraeger.lagerplatz ? `${gescannterTraeger.lagerplatz.code} · ${gescannterTraeger.lagerplatz.bezeichnung}` : "Nicht zugeordnet"}</b></p>
+        <div className="mt-3 space-y-2">{gescannterTraeger.positionen.map((position) => <div key={position.artikel.id} className="flex items-center justify-between gap-3 rounded-xl bg-[var(--nova-hintergrund)] p-3"><div><b>{position.artikel.artikelnummer}</b><p className="text-xs text-[var(--nova-text-schwaecher)]">{position.artikel.produktname}{position.artikel.groesse ? ` · Gr. ${position.artikel.groesse}` : ""}{position.artikel.variante ? ` · ${position.artikel.variante}` : ""}</p></div><strong className="text-lg text-[var(--nova-akzent)]">{position.menge} Stk.</strong></div>)}</div>
+      </section>}
 
       <section className="rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-4">
         <div className="flex items-center gap-3">
@@ -200,7 +235,7 @@ export default function MobileMde() {
       </section>
 
       <section className="rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] p-4">
-        <div className="grid grid-cols-2 gap-3"><button onClick={() => void kameraStarten()} className="flex items-center justify-center gap-2 rounded-xl bg-[var(--nova-akzent)] px-4 py-4 font-semibold text-white"><Camera className="h-5 w-5" /> Kamera scannen</button><label className="flex items-center justify-center gap-2 rounded-xl border border-[var(--nova-rand)] px-4 py-4 font-semibold"><Keyboard className="h-5 w-5" /> Handscanner<input autoFocus value={scanText} onChange={(e) => setScanText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); scanVerarbeiten(scanText); } }} className="absolute h-px w-px opacity-0" /></label></div>
+        <div className="grid grid-cols-2 gap-3"><button onClick={() => void kameraStarten()} className="flex items-center justify-center gap-2 rounded-xl bg-[var(--nova-akzent)] px-4 py-4 font-semibold text-white"><Camera className="h-5 w-5" /> Kamera scannen</button><label className="flex items-center justify-center gap-2 rounded-xl border border-[var(--nova-rand)] px-4 py-4 font-semibold"><Keyboard className="h-5 w-5" /> Handscanner<input autoFocus value={scanText} onChange={(e) => setScanText(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void scanVerarbeiten(scanText); } }} className="absolute h-px w-px opacity-0" /></label></div>
         {!kameraUnterstuetzt && <p className="mt-3 text-xs text-amber-400">Kamera nicht verfügbar – Handscanner und manuelle Eingabe sind aktiv.</p>}
       </section>
 

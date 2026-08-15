@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { aktuellerBenutzer, administratorAnfordern } from "@/lib/auth-server";
 import { auditSpeichern } from "@/lib/audit";
+import { ladungstraegerMengen } from "@/lib/ladungstraeger-aufteilung";
 
 export async function GET() {
   try {
@@ -16,7 +17,15 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(artikel);
+    return NextResponse.json(
+      artikel.map((eintrag) => ({
+        ...eintrag,
+        ladungstraegerAnzahl: ladungstraegerMengen(
+          eintrag.artikelnummer,
+          eintrag.bestand,
+        ).length,
+      })),
+    );
   } catch (error) {
     console.error(error);
 

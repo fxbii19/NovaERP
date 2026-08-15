@@ -201,6 +201,25 @@ function splashErstellen() {
   return splash;
 }
 
+function installationsfensterErstellen() {
+  const fenster = new BrowserWindow({
+    width: 560,
+    height: 380,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    skipTaskbar: false,
+    center: true,
+    backgroundColor: "#020617",
+    icon: app.isPackaged
+      ? path.join(process.resourcesPath, "nova-app-icon.ico")
+      : path.join(__dirname, "assets", "nova-app-icon.ico"),
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+  });
+  void fenster.loadFile(path.join(__dirname, "installing.html"));
+  return fenster;
+}
+
 function fensterErstellen(
   serverBereit = Promise.resolve(),
   splash = null,
@@ -301,7 +320,9 @@ app.whenReady().then(() => {
   });
   ipcMain.handle("nova-update-installieren", () => {
     if (updateStatus.status !== "bereit") return false;
-    setImmediate(() => autoUpdater.quitAndInstall(true, true));
+    for (const fenster of BrowserWindow.getAllWindows()) fenster.hide();
+    installationsfensterErstellen();
+    setTimeout(() => autoUpdater.quitAndInstall(false, true), 1400);
     return true;
   });
   const serverBereit = paketServerStarten();
