@@ -4,6 +4,19 @@ import { aktuellerBenutzer } from "@/lib/auth-server";
 import { demoBestellpositionen } from "@/lib/demo-bestellpositionen";
 import { prisma } from "@/lib/prisma";
 
+function demoSchritte(bestellnummer: string, lieferscheinnummer: string) {
+  return [
+    { nummer: 1, titel: "Bestellung im Einkauf prüfen", text: bestellnummer, href: "/bestellungen", status: "BEREIT" },
+    { nummer: 2, titel: "Ware mit dem MDE erfassen", text: "Bestellposition öffnen und Ist-Menge scannen", href: "/lager/mde", status: "OFFEN" },
+    { nummer: 3, titel: "Produktzugang am PC bestätigen", text: `Lieferschein ${lieferscheinnummer} eintragen`, href: "/lager/produktzugang", status: "OFFEN" },
+    { nummer: 4, titel: "Bestand und Lagerplatz kontrollieren", text: "Gebuchten Zugang in der Bestandsmaske prüfen", href: "/bestand", status: "OFFEN" },
+    { nummer: 5, titel: "Qualitätsprüfung durchführen", text: "Demo-Prüfauftrag bearbeiten und freigeben", href: "/qualitaet/pruefauftraege", status: "OFFEN" },
+    { nummer: 6, titel: "Auftrag kommissionieren", text: "Demo-Auftrag starten und abschließen", href: "/logistik/kommissionierung", status: "OFFEN" },
+    { nummer: 7, titel: "Versand und Lieferschein abschließen", text: "Sendung vorbereiten, Lieferschein prüfen und versenden", href: "/logistik/versand", status: "OFFEN" },
+    { nummer: 8, titel: "Zahlung und Dashboard prüfen", text: "Zahlung bestätigen und Tageswerte kontrollieren", href: "/buchhaltung/zahlungen", status: "OFFEN" },
+  ];
+}
+
 async function demoArtikelSicherstellen(bestellungId: number, anzahl: number) {
   const positionen = demoBestellpositionen(bestellungId, anzahl);
 
@@ -100,6 +113,7 @@ export async function POST() {
         bestellnummer: vorhandeneBestellung.bestellnummer,
         lieferscheinnummer,
         positionen,
+        schritte: demoSchritte(vorhandeneBestellung.bestellnummer, lieferscheinnummer),
         meldung: "Der Demo-Testlauf ist bereits vorbereitet.",
       });
     }
@@ -362,6 +376,8 @@ export async function POST() {
       meldung: "Der vollständige Demo-Testlauf wurde vorbereitet.",
       ...ergebnis,
       positionen,
+      lieferscheinnummer: `DEMO-LS-${ergebnis.bestellnummer.replace("DEMO-EK-", "")}`,
+      schritte: demoSchritte(ergebnis.bestellnummer, `DEMO-LS-${ergebnis.bestellnummer.replace("DEMO-EK-", "")}`),
     });
   } catch (error) {
     console.error("NOVA Demo-Testlauf:", error);

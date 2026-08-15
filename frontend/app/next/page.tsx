@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   CircleDollarSign,
+  CheckCircle2,
   ClipboardCheck,
   FileSpreadsheet,
   Home,
@@ -66,6 +67,22 @@ type Navigation = {
   titel: string;
   punkte: Array<{ name: string; href: string; icon: LucideIcon }>;
 };
+
+type DemoSchritt = {
+  nummer: number;
+  titel: string;
+  text: string;
+  href: string;
+  status: "BEREIT" | "OFFEN";
+};
+
+type DemoAblauf = {
+  bestellnummer?: string;
+  lieferscheinnummer?: string;
+  schritte: DemoSchritt[];
+};
+
+const DEMO_ABLAUF_KEY = "nova-demo-ablauf";
 
 const navigation: Navigation[] = [
   { titel: "", punkte: [{ name: "Dashboard", href: "/next", icon: Home }] },
@@ -205,6 +222,7 @@ export default function NovaNextPage() {
   const [benutzerMenueOffen, setBenutzerMenueOffen] = useState(false);
   const [demoLaedt, setDemoLaedt] = useState(false);
   const [demoMeldung, setDemoMeldung] = useState("");
+  const [demoAblauf, setDemoAblauf] = useState<DemoAblauf | null>(null);
   const [offenesUntermenue, setOffenesUntermenue] = useState<{
     name: string;
     oben: number;
@@ -247,6 +265,15 @@ export default function NovaNextPage() {
     void laden();
   }, [laden]);
 
+  useEffect(() => {
+    try {
+      const gespeichert = window.sessionStorage.getItem(DEMO_ABLAUF_KEY);
+      if (gespeichert) setDemoAblauf(JSON.parse(gespeichert) as DemoAblauf);
+    } catch {
+      window.sessionStorage.removeItem(DEMO_ABLAUF_KEY);
+    }
+  }, []);
+
   const suchErgebnisse = useMemo(() => {
     const wert = suche.trim().toLocaleLowerCase("de-DE");
     if (!wert) return [];
@@ -269,9 +296,14 @@ export default function NovaNextPage() {
     setDemoMeldung("");
     try {
       const antwort = await fetch("/api/demo/testlauf", { method: "POST" });
-      const ergebnis = (await antwort.json()) as { meldung?: string; fehler?: string };
+      const ergebnis = (await antwort.json()) as { meldung?: string; fehler?: string; bestellnummer?: string; lieferscheinnummer?: string; schritte?: DemoSchritt[] };
       setDemoMeldung(ergebnis.meldung ?? ergebnis.fehler ?? "Unbekannte Antwort.");
-      if (antwort.ok) await laden();
+      if (antwort.ok && ergebnis.schritte) {
+        const ablauf: DemoAblauf = { bestellnummer: ergebnis.bestellnummer, lieferscheinnummer: ergebnis.lieferscheinnummer, schritte: ergebnis.schritte };
+        setDemoAblauf(ablauf);
+        window.sessionStorage.setItem(DEMO_ABLAUF_KEY, JSON.stringify(ablauf));
+        await laden();
+      }
     } catch {
       setDemoMeldung("Der Demo-Testlauf konnte nicht gestartet werden.");
     } finally {
@@ -397,6 +429,18 @@ export default function NovaNextPage() {
 
         <main className="mx-auto max-w-[1700px] p-5 xl:p-7">
           {(istDemo || demoMeldung) && <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50 p-4"><div><p className="text-sm font-semibold text-indigo-900">NOVA Demo-Modus</p><p className="text-xs text-indigo-700">{demoMeldung || "Bereite mit einem Klick einen vollständigen Testlauf vor."}</p></div>{istDemo && <button type="button" onClick={() => void demoVorbereiten()} disabled={demoLaedt} className="nova-akzent-verlauf rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{demoLaedt ? "Demo wird vorbereitet ..." : "Demo-Testlauf starten"}</button>}</div>}
+          {demoAblauf && <section className="mb-5 overflow-hidden rounded-xl border border-indigo-200 bg-white shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-indigo-100 bg-indigo-50 px-5 py-4">
+              <div><h2 className="font-bold text-indigo-950">Geführter NOVA-Demoablauf</h2><p className="mt-1 text-xs text-indigo-700">Arbeite die Stationen der Reihe nach ab. Der erste Schritt ist vorbereitet.</p></div>
+              <div className="text-right text-xs text-indigo-800"><p><b>Bestellung:</b> {demoAblauf.bestellnummer ?? "–"}</p><p><b>Lieferschein:</b> {demoAblauf.lieferscheinnummer ?? "–"}</p></div>
+            </div>
+            <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
+              {demoAblauf.schritte.map((schritt) => <Link key={schritt.nummer} href={schritt.href} className="group rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50">
+                <div className="flex items-center justify-between"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">{schritt.nummer}</span>{schritt.status === "BEREIT" ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : <ChevronRight className="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-indigo-600" />}</div>
+                <h3 className="mt-3 text-sm font-bold text-slate-900">{schritt.titel}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{schritt.text}</p>
+              </Link>)}
+            </div>
+          </section>}
           <section className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-center gap-4"><div className={`h-3 w-3 rounded-full ${daten?.systemstatus === "AUFMERKSAMKEIT" ? "bg-amber-400" : "bg-emerald-500"}`} /><div><h2 className="text-lg font-bold text-slate-900">NOVA AI Command Center</h2><p className="text-xs text-slate-500">{daten?.systemstatus === "AUFMERKSAMKEIT" ? "Einige Prozesse benötigen Aufmerksamkeit" : "Alle Kernprozesse laufen stabil"}</p></div></div>
             <button type="button" onClick={() => void laden()} disabled={laedt} className="nova-akzent-verlauf flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${laedt ? "animate-spin" : ""}`} />{laedt ? "Aktualisiert ..." : "Live aktualisieren"}</button>
