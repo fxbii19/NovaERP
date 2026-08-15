@@ -13,9 +13,11 @@ const zeit = new Date();
 const datum = zeit.toISOString().slice(0, 10).replaceAll("-", "");
 const kurz = Date.now().toString().slice(-6);
 const suffix = `${datum}-${kurz}`;
-const warenwert = 6847.39;
-const zahlungswert = 4312.68;
-const nettowert = Math.round((warenwert / 1.19) * 100) / 100;
+const demoMenge = 16 + (Number(kurz.slice(-2)) % 29);
+const demoEinzelpreis = 89.9 + (Number(kurz.slice(-3)) % 5) * 13.75;
+const nettowert = Math.round(demoMenge * demoEinzelpreis * 100) / 100;
+const warenwert = Math.round(nettowert * 1.19 * 100) / 100;
+const zahlungswert = Math.round(warenwert * (0.35 + (Number(kurz.slice(-1)) % 4) * 0.1) * 100) / 100;
 
 async function eins(sql, werte = []) {
   const ergebnis = await db.query(sql, werte);
@@ -82,8 +84,8 @@ try {
     ],
   );
   await db.query(
-    `INSERT INTO "Logistikposition" ("auftragId","artikelId","menge","einzelpreis","kommissionierteMenge") VALUES ($1,$2,24,129.90,0)`,
-    [auftrag.id, artikel.id],
+    `INSERT INTO "Logistikposition" ("auftragId","artikelId","menge","einzelpreis","kommissionierteMenge") VALUES ($1,$2,$3,$4,0)`,
+    [auftrag.id, artikel.id, demoMenge, demoEinzelpreis],
   );
 
   // 5. Versand/Buchhaltung: Eine ältere Demo-Sendung wartet auf Zahlung.

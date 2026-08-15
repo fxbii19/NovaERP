@@ -163,9 +163,11 @@ export async function POST() {
     const datum = jetzt.toISOString().slice(0, 10).replaceAll("-", "");
     const kurz = Date.now().toString().slice(-6);
     const suffix = `${datum}-${kurz}`;
-    const warenwert = 6847.39;
-    const zahlungswert = 4312.68;
-    const nettowert = Math.round((warenwert / 1.19) * 100) / 100;
+    const demoMenge = 16 + (Number(kurz.slice(-2)) % 29);
+    const demoEinzelpreis = 89.9 + (Number(kurz.slice(-3)) % 5) * 13.75;
+    const nettowert = Math.round(demoMenge * demoEinzelpreis * 100) / 100;
+    const warenwert = Math.round(nettowert * 1.19 * 100) / 100;
+    const zahlungswert = Math.round(warenwert * (0.35 + (Number(kurz.slice(-1)) % 4) * 0.1) * 100) / 100;
     const faelligAm = new Date(jetzt);
     faelligAm.setDate(faelligAm.getDate() + 14);
 
@@ -279,8 +281,8 @@ export async function POST() {
           positionen: {
             create: {
               artikelId: artikel.id,
-              menge: 24,
-              einzelpreis: 129.9,
+              menge: demoMenge,
+              einzelpreis: demoEinzelpreis,
             },
           },
         },
