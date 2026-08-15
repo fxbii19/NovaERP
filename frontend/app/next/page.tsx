@@ -73,7 +73,7 @@ type DemoSchritt = {
   titel: string;
   text: string;
   href: string;
-  status: "BEREIT" | "OFFEN";
+  status: "ERLEDIGT" | "BEREIT" | "GESPERRT";
 };
 
 type DemoAblauf = {
@@ -291,6 +291,24 @@ export default function NovaNextPage() {
     user.vorname.toLocaleLowerCase("de-DE") === "nova" &&
     user.nachname.toLocaleLowerCase("de-DE") === "demo";
 
+  useEffect(() => {
+    if (!istDemo) return;
+    let aktiv = true;
+    const fortschrittLaden = async () => {
+      try {
+        const antwort = await fetch(`/api/demo/testlauf?zeit=${Date.now()}`, { cache: "no-store" });
+        const ergebnis = await antwort.json() as DemoAblauf & { aktiv?: boolean };
+        if (aktiv && antwort.ok && ergebnis.schritte) {
+          setDemoAblauf(ergebnis);
+          window.sessionStorage.setItem(DEMO_ABLAUF_KEY, JSON.stringify(ergebnis));
+        }
+      } catch { /* Der normale Dashboardbetrieb bleibt verfügbar. */ }
+    };
+    void fortschrittLaden();
+    const timer = window.setInterval(() => void fortschrittLaden(), 4_000);
+    return () => { aktiv = false; window.clearInterval(timer); };
+  }, [istDemo]);
+
   async function demoVorbereiten() {
     setDemoLaedt(true);
     setDemoMeldung("");
@@ -435,10 +453,12 @@ export default function NovaNextPage() {
               <div className="text-right text-xs text-indigo-800"><p><b>Bestellung:</b> {demoAblauf.bestellnummer ?? "–"}</p><p><b>Lieferschein:</b> {demoAblauf.lieferscheinnummer ?? "–"}</p></div>
             </div>
             <div className="grid gap-3 p-4 md:grid-cols-2 xl:grid-cols-4">
-              {demoAblauf.schritte.map((schritt) => <Link key={schritt.nummer} href={schritt.href} className="group rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50">
-                <div className="flex items-center justify-between"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">{schritt.nummer}</span>{schritt.status === "BEREIT" ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : <ChevronRight className="h-5 w-5 text-slate-400 transition group-hover:translate-x-1 group-hover:text-indigo-600" />}</div>
-                <h3 className="mt-3 text-sm font-bold text-slate-900">{schritt.titel}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{schritt.text}</p>
-              </Link>)}
+              {demoAblauf.schritte.map((schritt) => {
+                const inhalt = <><div className="flex items-center justify-between"><span className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold text-white ${schritt.status === "ERLEDIGT" ? "bg-emerald-500" : schritt.status === "BEREIT" ? "bg-indigo-600" : "bg-slate-400"}`}>{schritt.nummer}</span>{schritt.status === "ERLEDIGT" ? <CheckCircle2 className="h-5 w-5 text-emerald-500" /> : schritt.status === "BEREIT" ? <ChevronRight className="h-5 w-5 text-indigo-500 transition group-hover:translate-x-1" /> : <span className="text-xs font-semibold text-slate-400">Gesperrt</span>}</div><h3 className="mt-3 text-sm font-bold text-slate-900">{schritt.titel}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{schritt.text}</p><p className={`mt-2 text-[10px] font-bold uppercase tracking-wide ${schritt.status === "ERLEDIGT" ? "text-emerald-600" : schritt.status === "BEREIT" ? "text-indigo-600" : "text-slate-400"}`}>{schritt.status === "ERLEDIGT" ? "Erledigt" : schritt.status === "BEREIT" ? "Jetzt bearbeiten" : "Vorherigen Schritt abschließen"}</p></>;
+                return schritt.status === "GESPERRT"
+                  ? <div key={schritt.nummer} className="cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 p-4 opacity-70">{inhalt}</div>
+                  : <Link key={schritt.nummer} href={schritt.href} className="group rounded-xl border border-slate-200 bg-slate-50 p-4 transition hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50">{inhalt}</Link>;
+              })}
             </div>
           </section>}
           <section className="mb-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">

@@ -165,9 +165,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ fehler: "Die Erfassung ist nicht mehr offen." }, { status: 400 });
       }
 
+      const bestellTreffer = bewegung.notiz?.match(/^MDE-BESTELLPOSITION:(\d+):(\d+)/);
+      let bestellLieferschein: string | null = null;
+      if (bestellTreffer) {
+        const bestellungId = Number(bestellTreffer[1]);
+        const bestellung = await prisma.bestellung.findUnique({ where: { id: bestellungId } });
+        if (!bestellung) return NextResponse.json({ fehler: "Die zugehörige Bestellung wurde nicht gefunden." }, { status: 404 });
+        const { demoBestellpositionen } = await import("@/lib/demo-bestellpositionen");
+        const sollPositionen = demoBestellpositionen(bestellung.id, bestellung.gesamtpositionen);
+        const alleErfassungen = await prisma.lagerbewegung.findMany({
+          where: { typ: "EINGANG", notiz: { startsWith: `MDE-BESTELLPOSITION:${bestellung.id}:` } },
+          select: { menge: true, notiz: true },
+        });
+        const fehlendePositionen = sollPositionen.filter((position) => alleErfassungen
+          .filter((eintrag) => eintrag.notiz?.startsWith(`MDE-BESTELLPOSITION:${bestellung.id}:${position.position}`))
+          .reduce((summe, eintrag) => summe + eintrag.menge, 0) < position.menge);
+        if (fehlendePositionen.length > 0) {
+          return NextResponse.json({ fehler: `PC-Bestätigung gesperrt: Zuerst müssen alle Waren am MDE erfasst werden. Es fehlen noch ${fehlendePositionen.length} Position(en).` }, { status: 409 });
+        }
+        bestellLieferschein = bestellung.lieferscheinnummer;
+      }
+
       const lieferschein = String(daten.lieferscheinnummer ?? "").trim();
       if (bewegung.typ === "EINGANG" && !lieferschein) {
         return NextResponse.json({ fehler: "Die Lieferscheinnummer ist erforderlich." }, { status: 400 });
+      }
+      if (bestellLieferschein && lieferschein !== bestellLieferschein) {
+        return NextResponse.json({ fehler: `Die Lieferscheinnummer stimmt nicht. Erwartet wird ${bestellLieferschein}.` }, { status: 400 });
       }
 
       await prisma.$transaction(async (tx) => {

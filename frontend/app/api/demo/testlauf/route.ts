@@ -4,17 +4,58 @@ import { aktuellerBenutzer } from "@/lib/auth-server";
 import { demoBestellpositionen } from "@/lib/demo-bestellpositionen";
 import { prisma } from "@/lib/prisma";
 
-function demoSchritte(bestellnummer: string, lieferscheinnummer: string) {
+type SchrittStatus = "ERLEDIGT" | "BEREIT" | "GESPERRT";
+
+function demoSchritte(bestellnummer: string, lieferscheinnummer: string, status?: SchrittStatus[]) {
+  const s = status ?? ["ERLEDIGT", "BEREIT", "GESPERRT", "GESPERRT", "GESPERRT", "GESPERRT", "GESPERRT", "GESPERRT"];
   return [
-    { nummer: 1, titel: "Bestellung im Einkauf prüfen", text: bestellnummer, href: "/bestellungen", status: "BEREIT" },
-    { nummer: 2, titel: "Ware mit dem MDE erfassen", text: "Bestellposition öffnen und Ist-Menge scannen", href: "/lager/mde", status: "OFFEN" },
-    { nummer: 3, titel: "Produktzugang am PC bestätigen", text: `Lieferschein ${lieferscheinnummer} eintragen`, href: "/lager/produktzugang", status: "OFFEN" },
-    { nummer: 4, titel: "Bestand und Lagerplatz kontrollieren", text: "Gebuchten Zugang in der Bestandsmaske prüfen", href: "/bestand", status: "OFFEN" },
-    { nummer: 5, titel: "Qualitätsprüfung durchführen", text: "Demo-Prüfauftrag bearbeiten und freigeben", href: "/qualitaet/pruefauftraege", status: "OFFEN" },
-    { nummer: 6, titel: "Auftrag kommissionieren", text: "Demo-Auftrag starten und abschließen", href: "/logistik/kommissionierung", status: "OFFEN" },
-    { nummer: 7, titel: "Versand und Lieferschein abschließen", text: "Sendung vorbereiten, Lieferschein prüfen und versenden", href: "/logistik/versand", status: "OFFEN" },
-    { nummer: 8, titel: "Zahlung und Dashboard prüfen", text: "Zahlung bestätigen und Tageswerte kontrollieren", href: "/buchhaltung/zahlungen", status: "OFFEN" },
+    { nummer: 1, titel: "Bestellung im Einkauf prüfen", text: bestellnummer, href: "/bestellungen", status: s[0] },
+    { nummer: 2, titel: "Ware mit dem MDE erfassen", text: "Alle Bestellpositionen und Ist-Mengen scannen", href: "/lager/mde", status: s[1] },
+    { nummer: 3, titel: "Produktzugang am PC bestätigen", text: `Erst nach vollständiger MDE-Erfassung · ${lieferscheinnummer}`, href: "/lager/produktzugang", status: s[2] },
+    { nummer: 4, titel: "Bestand und Lagerplatz kontrollieren", text: "Wird nach der PC-Bestätigung automatisch erkannt", href: "/bestand", status: s[3] },
+    { nummer: 5, titel: "Qualitätsprüfung durchführen", text: "Erst nach bestätigtem Wareneingang", href: "/qualitaet/pruefauftraege", status: s[4] },
+    { nummer: 6, titel: "Auftrag kommissionieren", text: "Erst nach abgeschlossener Qualitätsprüfung", href: "/logistik/kommissionierung", status: s[5] },
+    { nummer: 7, titel: "Versand und Lieferschein abschließen", text: "Erst nach vollständiger Kommissionierung", href: "/logistik/versand", status: s[6] },
+    { nummer: 8, titel: "Einkauf abschließen und Zahlung freigeben", text: "Nur wenn MDE und PC-Bestätigung vollständig sind", href: "/bestellungen", status: s[7] },
   ];
+}
+
+async function demoFortschritt() {
+  const bestellung = await prisma.bestellung.findFirst({
+    where: { bestellnummer: { startsWith: "DEMO-EK-" } },
+    orderBy: { erstelltAm: "desc" },
+  });
+  if (!bestellung) return null;
+
+  const suffix = bestellung.bestellnummer.replace("DEMO-EK-", "");
+  const [bewegungen, pruefauftrag, auftrag] = await Promise.all([
+    prisma.lagerbewegung.findMany({ where: { typ: "EINGANG", notiz: { startsWith: `MDE-BESTELLPOSITION:${bestellung.id}:` } }, select: { menge: true, status: true, notiz: true } }),
+    prisma.pruefauftrag.findFirst({ where: { pruefnummer: `DEMO-QS-${suffix}` } }),
+    prisma.logistikauftrag.findFirst({ where: { auftragsnummer: `DEMO-AU-${suffix}` }, include: { versand: true } }),
+  ]);
+  const positionen = demoBestellpositionen(bestellung.id, bestellung.gesamtpositionen);
+  const mdeVollstaendig = positionen.every((position) => bewegungen
+    .filter((bewegung) => bewegung.notiz?.startsWith(`MDE-BESTELLPOSITION:${bestellung.id}:${position.position}`))
+    .reduce((summe, bewegung) => summe + bewegung.menge, 0) >= position.menge);
+  const pcVollstaendig = mdeVollstaendig && bewegungen.length > 0 && bewegungen.every((bewegung) => bewegung.status === "BESTAETIGT");
+  const qsErledigt = pcVollstaendig && !!pruefauftrag && !["OFFEN", "FREIGABE_OFFEN"].includes(pruefauftrag.status);
+  const kommissioniert = qsErledigt && !!auftrag && ["KOMMISSIONIERT", "VERLADUNG", "VERSANDBEREIT", "VERSENDET"].includes(auftrag.status);
+  const versendet = kommissioniert && auftrag?.status === "VERSENDET";
+  const einkaufErledigt = bestellung.status === "Abgeschlossen";
+  const erledigt = [true, mdeVollstaendig, pcVollstaendig, pcVollstaendig, qsErledigt, kommissioniert, versendet, einkaufErledigt];
+  const status: SchrittStatus[] = erledigt.map((fertig, index) => fertig ? "ERLEDIGT" : (index === 0 || erledigt[index - 1]) ? "BEREIT" : "GESPERRT");
+  return {
+    bestellnummer: bestellung.bestellnummer,
+    lieferscheinnummer: bestellung.lieferscheinnummer ?? `DEMO-LS-${suffix}`,
+    schritte: demoSchritte(bestellung.bestellnummer, bestellung.lieferscheinnummer ?? `DEMO-LS-${suffix}`, status),
+  };
+}
+
+export async function GET() {
+  const benutzer = await aktuellerBenutzer();
+  if (!benutzer || !demoBenutzer(benutzer)) return NextResponse.json({ fehler: "Demo-Status nicht verfügbar." }, { status: 403 });
+  const fortschritt = await demoFortschritt();
+  return NextResponse.json(fortschritt ?? { aktiv: false });
 }
 
 async function demoArtikelSicherstellen(bestellungId: number, anzahl: number) {

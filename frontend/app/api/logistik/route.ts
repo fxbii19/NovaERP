@@ -74,6 +74,14 @@ export async function POST(request: NextRequest) {
 
     if (aktion === "kommissionierung-starten") {
       const auftragId = Number(daten.auftragId);
+      const demoAuftrag = await prisma.logistikauftrag.findUnique({ where: { id: auftragId } });
+      if (demoAuftrag?.auftragsnummer.startsWith("DEMO-AU-")) {
+        const suffix = demoAuftrag.auftragsnummer.replace("DEMO-AU-", "");
+        const pruefauftrag = await prisma.pruefauftrag.findUnique({ where: { pruefnummer: `DEMO-QS-${suffix}` } });
+        if (!pruefauftrag || ["OFFEN", "FREIGABE_OFFEN"].includes(pruefauftrag.status)) {
+          return NextResponse.json({ fehler: "Kommissionierung gesperrt: Die Qualitätsprüfung muss zuerst abgeschlossen und freigegeben werden." }, { status: 409 });
+        }
+      }
       const kommissionierung = await prisma.$transaction(async (tx) => {
         const k = await tx.kommissionierung.upsert({
           where: { auftragId },

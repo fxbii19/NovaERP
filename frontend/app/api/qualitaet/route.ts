@@ -96,6 +96,19 @@ export async function POST(request: NextRequest) {
       if (!auftrag || !Number.isFinite(gutMenge) || !Number.isFinite(fehlerMenge) || gutMenge < 0 || fehlerMenge < 0) {
         return NextResponse.json({ fehler: "Prüfauftrag oder Mengen sind ungültig." }, { status: 400 });
       }
+      if (auftrag.pruefnummer.startsWith("DEMO-QS-")) {
+        const suffix = auftrag.pruefnummer.replace("DEMO-QS-", "");
+        const bestellung = await prisma.bestellung.findUnique({ where: { bestellnummer: `DEMO-EK-${suffix}` } });
+        if (bestellung) {
+          const bewegungen = await prisma.lagerbewegung.findMany({
+            where: { typ: "EINGANG", notiz: { startsWith: `MDE-BESTELLPOSITION:${bestellung.id}:` } },
+            select: { status: true },
+          });
+          if (bewegungen.length === 0 || bewegungen.some((bewegung) => bewegung.status !== "BESTAETIGT")) {
+            return NextResponse.json({ fehler: "Qualitätsprüfung gesperrt: Der Wareneingang muss zuerst vollständig am MDE erfasst und am PC bestätigt werden." }, { status: 409 });
+          }
+        }
+      }
       if (gutMenge + fehlerMenge > auftrag.pruefmenge) {
         return NextResponse.json({ fehler: "Gut- und Fehlermenge überschreiten die Prüfmenge." }, { status: 400 });
       }

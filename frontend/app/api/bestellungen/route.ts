@@ -72,6 +72,28 @@ export async function PATCH(request: NextRequest) {
     }
 
     const vorher = await prisma.bestellung.findUnique({ where: { id } });
+    if (!vorher) return NextResponse.json({ fehler: "Die Bestellung wurde nicht gefunden." }, { status: 404 });
+
+    if (status === "Abgeschlossen") {
+      const positionen = demoBestellpositionen(vorher.id, vorher.gesamtpositionen);
+      const erfassungen = await prisma.lagerbewegung.findMany({
+        where: { typ: "EINGANG", notiz: { startsWith: `MDE-BESTELLPOSITION:${vorher.id}:` } },
+        select: { menge: true, status: true, notiz: true },
+      });
+      const unvollstaendig = positionen.filter((position) => {
+        const gebucht = erfassungen
+          .filter((bewegung) => bewegung.notiz?.startsWith(`MDE-BESTELLPOSITION:${vorher.id}:${position.position}`))
+          .reduce((summe, bewegung) => summe + bewegung.menge, 0);
+        return gebucht < position.menge;
+      });
+      if (unvollstaendig.length > 0) {
+        return NextResponse.json({ fehler: `Die Bestellung kann noch nicht abgeschlossen werden. ${unvollstaendig.length} Position(en) wurden am MDE noch nicht vollständig erfasst.` }, { status: 409 });
+      }
+      const offenePcBestaetigungen = erfassungen.filter((bewegung) => bewegung.status !== "BESTAETIGT").length;
+      if (offenePcBestaetigungen > 0) {
+        return NextResponse.json({ fehler: `Die Bestellung kann noch nicht abgeschlossen werden. ${offenePcBestaetigungen} MDE-Erfassung(en) müssen zuerst am PC bestätigt werden.` }, { status: 409 });
+      }
+    }
     const bestellung = await prisma.bestellung.update({
       where: { id },
       data: { status },
