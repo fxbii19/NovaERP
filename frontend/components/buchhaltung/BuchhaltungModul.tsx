@@ -128,25 +128,22 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
         referenz: "",
       });
   }
-  const offen =
-    daten?.rechnungen.filter(
-      (r) =>
-        r.bruttowert -
-          r.zahlungen.reduce((summe, zahlung) => summe + zahlung.betrag, 0) >
-        0.005,
-    ) ?? [];
+  const restbetrag = (r: Rechnung) =>
+    Math.max(
+      0,
+      Math.round(
+        (r.bruttowert -
+          r.zahlungen.reduce((summe, zahlung) => summe + zahlung.betrag, 0)) *
+          100,
+      ) / 100,
+    );
+  const offen = daten?.rechnungen.filter((r) => restbetrag(r) >= 0.01) ?? [];
   const ausgewaehlt = offen.find((r) => String(r.id) === zahlung.rechnungId);
-  const maximalOffen = ausgewaehlt
-    ? Math.max(
-        0,
-        ausgewaehlt.bruttowert -
-          ausgewaehlt.zahlungen.reduce((s, z) => s + z.betrag, 0),
-      )
-    : 0;
+  const maximalOffen = ausgewaehlt ? restbetrag(ausgewaehlt) : 0;
   const offeneSumme = offen.reduce(
     (s, r) =>
       s +
-      Math.max(0, r.bruttowert - r.zahlungen.reduce((a, z) => a + z.betrag, 0)),
+      restbetrag(r),
     0,
   );
   const ueberfaellig = offen.filter(
