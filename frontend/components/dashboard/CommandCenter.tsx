@@ -10,7 +10,7 @@ type Daten = {
   systemstatus: "STABIL" | "AUFMERKSAMKEIT";
   kennzahlen: { artikelGesamt: number; kritischeBestaende: number; ohneBestand: number; offeneBestellungen: number; offeneAuftraege: number; offeneQs: number; sperrbestaende: number; offeneMde: number; offeneInventuren: number; versandbereit: number };
   heute: { lagerHeute: number; pruefungenHeute: number; kommissioniertHeute: number; versendetHeute: number };
-  umsatz: { versendetHeute: number; bezahltHeute: number; sendungen:Array<{id:number;versandnummer:string;auftragsnummer:string;kunde:string;warenwert:number;versendetAm:string|null;versendetVon:string|null;lieferscheinnummer:string|null}>; zahlungen:Array<{id:number;rechnungsnummer:string;kunde:string;betreff:string;betrag:number;zahlungsart:string;referenz:string|null;gebuchtAm:string;gebuchtVon:string|null}> } | null;
+  umsatz: { versendetHeute: number; bezahltHeute: number; sendungen:Array<{id:number;versandnummer:string;auftragsnummer:string;kunde:string;warenwert:number;versendetAm:string|null;versendetVon:string|null;lieferscheinnummer:string|null;rechnungId:number|null;rechnungsnummer:string|null}>; zahlungen:Array<{id:number;rechnungId:number;rechnungsnummer:string;kunde:string;betreff:string;betrag:number;zahlungsart:string;referenz:string|null;gebuchtAm:string;gebuchtVon:string|null}> } | null;
   warnungen: Array<{ stufe: string; titel: string; text: string; href: string }>;
   empfehlungen: string[];
 };

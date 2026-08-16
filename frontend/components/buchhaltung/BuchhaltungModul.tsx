@@ -61,6 +61,7 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
   const [daten, setDaten] = useState<Daten | null>(null);
   const [fehler, setFehler] = useState("");
   const [sendet, setSendet] = useState(false);
+  const [zielRechnungId, setZielRechnungId] = useState<number | null>(null);
   const [uebersichtsfilter, setUebersichtsfilter] = useState<"alle" | "offene-rechnungen" | "offene-posten" | "ueberfaellig" | "heute-bezahlt">("alle");
   const [rechnung, setRechnung] = useState({
     kundeId: "",
@@ -89,6 +90,10 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
   useEffect(() => {
     void laden();
   }, [laden]);
+  useEffect(() => {
+    const id = Number(new URLSearchParams(window.location.search).get("rechnung"));
+    if (Number.isInteger(id) && id > 0) setZielRechnungId(id);
+  }, []);
   async function senden(aktion: string, inhalt: object) {
     setSendet(true);
     try {
@@ -199,7 +204,7 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
                 <Karte t="Heute bezahlt" w={euro(heute)} aktiv={uebersichtsfilter === "heute-bezahlt"} onClick={() => setUebersichtsfilter(uebersichtsfilter === "heute-bezahlt" ? "alle" : "heute-bezahlt")} />
               </div>
               {uebersichtsfilter !== "alle" && <div className="mt-5 flex items-center justify-between rounded-xl border border-[var(--nova-akzent)]/30 bg-[var(--nova-akzent)]/10 px-4 py-3 text-sm"><span>Aktiver Filter: <b>{uebersichtsfilter === "heute-bezahlt" ? "Heute bezahlt" : uebersichtsfilter === "ueberfaellig" ? "Überfällige Rechnungen" : "Offene Rechnungen und Posten"}</b></span><button type="button" onClick={() => setUebersichtsfilter("alle")} className="font-semibold text-[var(--nova-akzent)]">Alle anzeigen</button></div>}
-              <Liste rechnungen={uebersichtRechnungen} />
+              <Liste rechnungen={uebersichtRechnungen} zielRechnungId={zielRechnungId} />
             </>
           )}
           {daten && modus === "rechnungen" && (
@@ -247,7 +252,7 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
                   <Button sendet={sendet} text="Rechnung erstellen" />
                 </form>
               </Form>
-              <Liste rechnungen={daten.rechnungen} />
+              <Liste rechnungen={daten.rechnungen} zielRechnungId={zielRechnungId} />
             </>
           )}
           {daten && modus === "zahlungen" && (
@@ -314,7 +319,7 @@ export default function BuchhaltungModul({ modus }: { modus: Modus }) {
                   <Button sendet={sendet} text="Zahlung buchen" />
                 </form>
               </Form>
-              <Liste rechnungen={offen} />
+              <Liste rechnungen={offen} zielRechnungId={zielRechnungId} />
             </>
           )}
           {!daten && !fehler && (
@@ -351,8 +356,13 @@ function Form({
     </section>
   );
 }
-function Liste({ rechnungen }: { rechnungen: Rechnung[] }) {
+function Liste({ rechnungen, zielRechnungId }: { rechnungen: Rechnung[]; zielRechnungId?: number | null }) {
   const [offen, setOffen] = useState<Rechnung | null>(null);
+  useEffect(() => {
+    if (!zielRechnungId) return;
+    const ziel = rechnungen.find((rechnung) => rechnung.id === zielRechnungId);
+    if (ziel) setOffen(ziel);
+  }, [rechnungen, zielRechnungId]);
   return (
     <>
       <section className="mt-8 overflow-hidden rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)]">

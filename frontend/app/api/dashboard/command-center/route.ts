@@ -53,11 +53,16 @@ export async function GET() {
           prisma.zahlung.aggregate({ where: { gebuchtAm: { gte: heute } }, _sum: { betrag: true } }),
           prisma.versand.findMany({ where: { versendetAm: { gte: heute } }, include: { auftrag: true, lieferschein: true }, orderBy: { versendetAm: "desc" } }),
           prisma.zahlung.findMany({ where: { gebuchtAm: { gte: heute } }, include: { rechnung: true }, orderBy: { gebuchtAm: "desc" } }),
-        ]).then(([versendet, bezahlt, sendungen, zahlungen]) => ({
+          prisma.rechnung.findMany({ select: { id: true, rechnungsnummer: true, betreff: true } }),
+        ]).then(([versendet, bezahlt, sendungen, zahlungen, rechnungen]) => ({
           versendetHeute: Math.round((versendet._sum.warenwert ?? 0) * 100) / 100,
           bezahltHeute: Math.round((bezahlt._sum.betrag ?? 0) * 100) / 100,
-          sendungen: sendungen.map(s => ({ id:s.id, versandnummer:s.versandnummer, auftragsnummer:s.auftrag.auftragsnummer, kunde:s.auftrag.kunde, warenwert:s.warenwert, versendetAm:s.versendetAm, versendetVon:s.versendetVon, lieferscheinnummer:s.lieferschein?.lieferscheinnummer ?? null })),
-          zahlungen: zahlungen.map(z => ({ id:z.id, rechnungsnummer:z.rechnung.rechnungsnummer, kunde:z.rechnung.kundeName, betreff:z.rechnung.betreff, betrag:z.betrag, zahlungsart:z.zahlungsart, referenz:z.referenz, gebuchtAm:z.gebuchtAm, gebuchtVon:z.gebuchtVon })),
+          sendungen: sendungen.map(s => {
+            const suffix = s.auftrag.auftragsnummer.startsWith("DEMO-AU-") ? s.auftrag.auftragsnummer.slice("DEMO-AU-".length) : null;
+            const rechnung = rechnungen.find(r => (suffix && r.rechnungsnummer === `DEMO-RE-${suffix}`) || r.betreff.includes(s.auftrag.auftragsnummer));
+            return { id:s.id, versandnummer:s.versandnummer, auftragsnummer:s.auftrag.auftragsnummer, kunde:s.auftrag.kunde, warenwert:s.warenwert, versendetAm:s.versendetAm, versendetVon:s.versendetVon, lieferscheinnummer:s.lieferschein?.lieferscheinnummer ?? null, rechnungId:rechnung?.id ?? null, rechnungsnummer:rechnung?.rechnungsnummer ?? null };
+          }),
+          zahlungen: zahlungen.map(z => ({ id:z.id, rechnungId:z.rechnung.id, rechnungsnummer:z.rechnung.rechnungsnummer, kunde:z.rechnung.kundeName, betreff:z.rechnung.betreff, betrag:z.betrag, zahlungsart:z.zahlungsart, referenz:z.referenz, gebuchtAm:z.gebuchtAm, gebuchtVon:z.gebuchtVon })),
         }))
       : null;
 
