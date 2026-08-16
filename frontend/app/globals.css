@@ -213,6 +213,18 @@ html[data-theme="light"] .nova-enterprise-shell .nova-enterprise-content :is(tab
   background: transparent !important;
 }
 
+html[data-theme="light"] .nova-bestand-zeile:hover {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--nova-akzent) 34%, #ffffff),
+    color-mix(in srgb, var(--nova-akzent-zweitfarbe) 24%, #ffffff)
+  ) !important;
+  box-shadow:
+    inset 4px 0 0 var(--nova-akzent),
+    inset 0 1px 0 color-mix(in srgb, var(--nova-akzent) 30%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--nova-akzent-zweitfarbe) 24%, transparent);
+}
+
 html[data-schrift="klein"] { font-size: 14px; }
 html[data-schrift="normal"] { font-size: 16px; }
 html[data-schrift="gross"] { font-size: 18px; }
