@@ -430,149 +430,31 @@ function Rechnungsdetail({
 }) {
   const bezahlt = rechnung.zahlungen.reduce((summe, z) => summe + z.betrag, 0),
     rest = Math.max(0, rechnung.bruttowert - bezahlt);
+  const steuer = rechnung.bruttowert - rechnung.nettowert;
   return (
-    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/75 p-5 backdrop-blur-sm">
-      <section className="mx-auto w-full max-w-5xl overflow-hidden rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] shadow-2xl">
-        <header className="flex items-start justify-between gap-5 border-b border-[var(--nova-rand)] p-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[.2em] text-[var(--nova-akzent)]">
-              Rechnungsdetails
-            </p>
-            <h2 className="mt-2 text-2xl font-bold">
-              {rechnung.rechnungsnummer}
-            </h2>
-            <p className="mt-1 text-[var(--nova-text-schwaecher)]">
-              {rechnung.betreff}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={schliessen}
-            className="rounded-xl border border-[var(--nova-rand)] px-4 py-2"
-          >
-            Schließen
-          </button>
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/80 p-5 backdrop-blur-sm">
+      <style jsx global>{`@media print { body * { visibility: hidden !important; } .nova-rechnung-papier, .nova-rechnung-papier * { visibility: visible !important; } .nova-rechnung-papier { position: absolute !important; inset: 0 !important; width: 210mm !important; min-height: 297mm !important; margin: 0 !important; box-shadow: none !important; border: 0 !important; } .rechnung-werkzeuge { display: none !important; } }`}</style>
+      <div className="rechnung-werkzeuge mx-auto mb-4 flex w-full max-w-[900px] justify-end gap-3">
+        <button type="button" onClick={() => window.print()} className="rounded-xl bg-[var(--nova-akzent)] px-5 py-3 font-semibold text-white">Drucken / als PDF speichern</button>
+        <button type="button" onClick={schliessen} className="rounded-xl border border-white/20 bg-slate-900 px-5 py-3 font-semibold text-white">Schließen</button>
+      </div>
+      <article className="nova-rechnung-papier mx-auto min-h-[1120px] w-full max-w-[900px] bg-white px-16 py-14 text-slate-900 shadow-2xl">
+        <header className="flex items-start justify-between border-b-2 border-slate-900 pb-10">
+          <div><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-3xl font-black text-white">N</div><p className="mt-3 text-xl font-black tracking-wide">NOVA ERP</p><p className="text-xs uppercase tracking-[.2em] text-slate-500">Workflow Automation</p></div>
+          <div className="text-right"><h2 className="text-4xl font-light uppercase tracking-[.12em]">Rechnung</h2><p className="mt-4 text-lg font-bold">{rechnung.rechnungsnummer}</p><p className="mt-1 text-sm text-slate-500">{rechnung.betreff}</p></div>
         </header>
-        <div className="grid gap-5 border-b border-[var(--nova-rand)] p-6 md:grid-cols-2">
-          <div>
-            <p className="text-sm text-[var(--nova-text-schwaecher)]">
-              Kunde / Empfänger
-            </p>
-            <h3 className="mt-1 text-lg font-bold">{rechnung.kundeName}</h3>
-            <p className="mt-2 whitespace-pre-line">
-              {rechnung.auftrag?.lieferadresse ??
-                "Keine Lieferadresse zugeordnet"}
-            </p>
-            {rechnung.auftrag && (
-              <p className="mt-2 text-sm">
-                Auftrag: <b>{rechnung.auftrag.auftragsnummer}</b>
-              </p>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Detailwert
-              label="Rechnungsdatum"
-              wert={new Date(rechnung.rechnungsdatum).toLocaleDateString(
-                "de-DE",
-              )}
-            />
-            <Detailwert
-              label="Fällig"
-              wert={new Date(rechnung.faelligAm).toLocaleDateString("de-DE")}
-            />
-            <Detailwert label="Bruttobetrag" wert={euro(rechnung.bruttowert)} />
-            <Detailwert label="Status" wert={rechnung.status} />
-          </div>
-        </div>
-        <div className="p-6">
-          <h3 className="mb-3 text-lg font-semibold">Was der Kunde erhält</h3>
-          {rechnung.auftrag?.positionen.length ? (
-            <div className="overflow-x-auto rounded-xl border border-[var(--nova-rand)]">
-              <table className="w-full text-sm">
-                <thead className="bg-[var(--nova-hintergrund)]">
-                  <tr>
-                    {[
-                      "Artikel",
-                      "Größe / Variante",
-                      "Menge",
-                      "Einzelpreis",
-                      "Gesamt",
-                    ].map((t) => (
-                      <th key={t} className="px-4 py-3 text-left">
-                        {t}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rechnung.auftrag.positionen.map((p) => (
-                    <tr
-                      key={p.id}
-                      className="border-t border-[var(--nova-rand)]"
-                    >
-                      <td className="px-4 py-3">
-                        <b>{p.artikel.artikelnummer}</b>
-                        <small className="block text-[var(--nova-text-schwaecher)]">
-                          {p.artikel.produktname}
-                        </small>
-                      </td>
-                      <td className="px-4 py-3">
-                        {p.artikel.groesse ?? "–"} / {p.artikel.variante ?? "–"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {p.menge.toLocaleString("de-DE")} Stk.
-                      </td>
-                      <td className="px-4 py-3">{euro(p.einzelpreis)}</td>
-                      <td className="px-4 py-3 font-semibold">
-                        {euro(p.menge * p.einzelpreis)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="rounded-xl border border-dashed border-[var(--nova-rand)] p-5 text-[var(--nova-text-schwaecher)]">
-              Dieser manuell erstellten Rechnung wurde noch kein Logistikauftrag
-              zugeordnet.
-            </p>
-          )}
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <Betrag label="Rechnungsbetrag" wert={rechnung.bruttowert} />
-            <Betrag label="Bereits bezahlt" wert={bezahlt} gruen />
-            <Betrag label="Noch offen" wert={rest} warnung={rest > 0} />
-          </div>
-          <div className="mt-6">
-            <h3 className="font-semibold">Zahlungsverlauf</h3>
-            {rechnung.zahlungen.length ? (
-              rechnung.zahlungen.map((z) => (
-                <div
-                  key={z.id}
-                  className="mt-3 flex flex-wrap justify-between gap-3 rounded-xl bg-[var(--nova-hintergrund)] p-4"
-                >
-                  <span>
-                    {new Date(z.gebuchtAm).toLocaleDateString("de-DE")} ·{" "}
-                    {z.zahlungsart}
-                    {z.referenz ? ` · ${z.referenz}` : ""}
-                  </span>
-                  <b className="text-emerald-400">{euro(z.betrag)}</b>
-                </div>
-              ))
-            ) : (
-              <p className="mt-3 text-sm text-[var(--nova-text-schwaecher)]">
-                Noch kein Zahlungseingang vorhanden – deshalb ist der
-                vollständige Rechnungsbetrag offen.
-              </p>
-            )}
-          </div>
-          {rechnung.status === "TEILBEZAHLT" && (
-            <p className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
-              Teilbezahlt bedeutet: Es wurde bereits {euro(bezahlt)} gebucht,
-              aber {euro(rest)} fehlen noch bis zum vollständigen Ausgleich.
-            </p>
-          )}
-        </div>
-      </section>
+        <section className="mt-10 grid grid-cols-[1.3fr_1fr] gap-16">
+          <div><p className="mb-3 text-[10px] uppercase tracking-[.18em] text-slate-500">Rechnung an</p><h3 className="text-lg font-bold">{rechnung.kundeName}</h3><p className="mt-2 whitespace-pre-line text-sm leading-6">{rechnung.auftrag?.lieferadresse ?? "Keine Lieferadresse zugeordnet"}</p></div>
+          <dl className="grid grid-cols-2 gap-x-5 gap-y-3 text-sm"><dt className="text-slate-500">Rechnungsdatum</dt><dd className="text-right font-semibold">{new Date(rechnung.rechnungsdatum).toLocaleDateString("de-DE")}</dd><dt className="text-slate-500">Fällig am</dt><dd className="text-right font-semibold">{new Date(rechnung.faelligAm).toLocaleDateString("de-DE")}</dd><dt className="text-slate-500">Auftrag</dt><dd className="text-right font-semibold">{rechnung.auftrag?.auftragsnummer ?? "–"}</dd><dt className="text-slate-500">Kundenreferenz</dt><dd className="text-right font-semibold">{rechnung.auftrag?.kundenreferenz ?? "–"}</dd></dl>
+        </section>
+        <table className="mt-12 w-full text-sm">
+          <thead><tr className="border-y-2 border-slate-900 text-left text-xs uppercase tracking-wider"><th className="py-3">Pos.</th><th>Artikel / Beschreibung</th><th>Größe / Variante</th><th className="text-right">Menge</th><th className="text-right">Einzelpreis</th><th className="text-right">Gesamt</th></tr></thead>
+          <tbody>{rechnung.auftrag?.positionen.length ? rechnung.auftrag.positionen.map((p, index) => <tr key={p.id} className="border-b border-slate-200 align-top"><td className="py-4">{index + 1}</td><td className="py-4"><b>{p.artikel.artikelnummer}</b><span className="mt-1 block text-xs text-slate-500">{p.artikel.produktname}</span></td><td className="py-4">{p.artikel.groesse ?? "–"} / {p.artikel.variante ?? "–"}</td><td className="py-4 text-right">{p.menge.toLocaleString("de-DE")} Stk.</td><td className="py-4 text-right">{euro(p.einzelpreis)}</td><td className="py-4 text-right font-semibold">{euro(p.menge * p.einzelpreis)}</td></tr>) : <tr><td colSpan={6} className="py-8 text-center text-slate-500">Keine Auftragspositionen zugeordnet.</td></tr>}</tbody>
+        </table>
+        <section className="mt-8 ml-auto w-full max-w-sm text-sm"><div className="flex justify-between border-b border-slate-200 py-2"><span>Nettobetrag</span><b>{euro(rechnung.nettowert)}</b></div><div className="flex justify-between border-b border-slate-200 py-2"><span>Umsatzsteuer {rechnung.steuersatz.toLocaleString("de-DE")} %</span><b>{euro(steuer)}</b></div><div className="flex justify-between border-b-2 border-slate-900 py-4 text-xl"><span>Gesamtbetrag</span><b>{euro(rechnung.bruttowert)}</b></div>{bezahlt > 0 && <div className="flex justify-between py-2 text-emerald-700"><span>Bereits bezahlt</span><b>− {euro(bezahlt)}</b></div>}<div className="flex justify-between bg-slate-100 px-3 py-3 text-lg"><span>Noch offen</span><b>{euro(rest)}</b></div></section>
+        <section className="mt-12 border-t border-slate-300 pt-6 text-sm leading-6"><p>Bitte überweisen Sie den offenen Betrag bis zum <b>{new Date(rechnung.faelligAm).toLocaleDateString("de-DE")}</b> unter Angabe der Rechnungsnummer <b>{rechnung.rechnungsnummer}</b>.</p><p className="mt-3 font-semibold">Zahlungsstatus: {rechnung.status}</p></section>
+        <footer className="mt-14 grid grid-cols-3 gap-8 border-t border-slate-300 pt-5 text-[10px] leading-4 text-slate-500"><p><b className="text-slate-700">NOVA ERP Demo GmbH</b><br/>Innovationsstraße 1<br/>10115 Berlin</p><p><b className="text-slate-700">Bankverbindung</b><br/>NOVA Demo Bank<br/>IBAN DE00 0000 0000 0000 0000 00</p><p><b className="text-slate-700">Kontakt</b><br/>rechnung@nova-test.de<br/>www.nova-erp.de</p></footer>
+      </article>
     </div>
   );
 }
