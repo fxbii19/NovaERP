@@ -117,12 +117,12 @@ const navigation: Navigation[] = [
       { name: "Kommunikation", href: "/kommunikation", icon: Mail },
       { name: "Organisation", href: "/organisation", icon: CalendarDays },
       { name: "Mitarbeiter", href: "/mitarbeiter", icon: Users },
+      { name: "NOVA Sheets", href: "/nova-sheets", icon: FileSpreadsheet },
     ],
   },
   {
     titel: "Administration",
     punkte: [
-      { name: "NOVA Sheets", href: "/nova-sheets", icon: FileSpreadsheet },
       { name: "Live MDE", href: "/admin/mde-live", icon: Activity },
       { name: "Alarmcenter", href: "/alarmcenter", icon: AlarmClock },
       { name: "Sicherheit", href: "/admin/sicherheit", icon: ShieldCheck },
