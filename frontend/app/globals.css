@@ -199,6 +199,20 @@ html[data-theme="light"] .nova-enterprise-shell .nova-enterprise-content :is(tab
 .nova-akzent-verlauf { background-image: var(--nova-akzent-verlauf); }
 .nova-akzent-verlauf:hover { background-image: var(--nova-akzent-verlauf-hover); }
 
+/* Bestandszeilen übernehmen beide Farben des aktuell gewählten Akzentverlaufs. */
+.nova-bestand-zeile:hover {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--nova-akzent) 18%, var(--nova-flaeche)),
+    color-mix(in srgb, var(--nova-akzent-zweitfarbe) 12%, var(--nova-flaeche))
+  ) !important;
+  box-shadow: inset 3px 0 0 var(--nova-akzent);
+}
+
+.nova-bestand-zeile:hover > td {
+  background: transparent !important;
+}
+
 html[data-schrift="klein"] { font-size: 14px; }
 html[data-schrift="normal"] { font-size: 16px; }
 html[data-schrift="gross"] { font-size: 18px; }

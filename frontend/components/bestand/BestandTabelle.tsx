@@ -989,7 +989,7 @@ export default function BestandTabelle({
                 <tr
                   key={eintrag.id}
                   onClick={() => detailOeffnen(eintrag)}
-                className="cursor-pointer border-t border-[var(--nova-rand)] transition-colors duration-150 hover:!bg-[var(--nova-hover)] [&:hover>td]:!bg-[var(--nova-hover)]"
+                className="nova-bestand-zeile cursor-pointer border-t border-[var(--nova-rand)] transition duration-150"
                 >
                   {istAdmin && (
                     <td className="px-4 py-4" onClick={(event) => event.stopPropagation()}>
