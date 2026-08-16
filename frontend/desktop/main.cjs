@@ -1,6 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain, shell } = require("electron");
 const { autoUpdater } = require("electron-updater");
-const { spawn } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -11,6 +11,26 @@ let novaServer = null;
 let updateStatus = { status: "aktuell" };
 let updateKonfiguriert = false;
 const splashDauer = 3200;
+
+function produktnamenBereinigen(datenbankPfad) {
+  const ergebnis = spawnSync(
+    path.join(process.resourcesPath, "node.exe"),
+    [
+      path.join(app.getAppPath(), "desktop", "normalize-product-names.cjs"),
+      datenbankPfad,
+    ],
+    {
+      windowsHide: true,
+      env: {
+        ...process.env,
+        NODE_PATH: path.join(app.getAppPath(), "node_modules"),
+      },
+    },
+  );
+  if (ergebnis.status !== 0) {
+    console.error("Produktnamen konnten nicht bereinigt werden:", ergebnis.stderr?.toString());
+  }
+}
 
 function neuerungenLesen(releaseNotes) {
   const text = Array.isArray(releaseNotes)
@@ -136,6 +156,7 @@ async function paketServerStarten() {
       datenbank,
     );
   }
+  produktnamenBereinigen(datenbank);
   const protokoll = fs.openSync(
     path.join(app.getPath("userData"), "nova-server.log"),
     "a",

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { aktuellerBenutzer, administratorAnfordern } from "@/lib/auth-server";
 import { auditSpeichern } from "@/lib/audit";
 import { ladungstraegerMengen } from "@/lib/ladungstraeger-aufteilung";
+import { produktnameOhneVariante } from "@/lib/artikelname";
 
 export async function GET() {
   try {
@@ -20,6 +21,7 @@ export async function GET() {
     return NextResponse.json(
       artikel.map((eintrag) => ({
         ...eintrag,
+        produktname: produktnameOhneVariante(eintrag.produktname, eintrag.variante),
         ladungstraegerAnzahl: ladungstraegerMengen(
           eintrag.artikelnummer,
           eintrag.bestand,
@@ -60,9 +62,13 @@ export async function POST(request: NextRequest) {
       daten.artikelnummer ?? "",
     ).trim();
 
-    const produktname = String(
+    const variante = daten.variante
+      ? String(daten.variante).trim()
+      : null;
+    const produktname = produktnameOhneVariante(
       daten.produktname ?? "",
-    ).trim();
+      variante,
+    );
 
     if (!artikelnummer || !produktname) {
       return NextResponse.json(
@@ -108,9 +114,7 @@ export async function POST(request: NextRequest) {
         groesse: daten.groesse
           ? String(daten.groesse).trim()
           : null,
-        variante: daten.variante
-          ? String(daten.variante).trim()
-          : null,
+        variante,
         bestand,
         reserviert,
         verfuegbar:
@@ -217,7 +221,10 @@ export async function PATCH(request: NextRequest) {
         );
       }
 
-      aenderungen.produktname = produktname;
+      const varianteFuerName = daten.variante !== undefined
+        ? String(daten.variante ?? "").trim()
+        : (await prisma.artikel.findFirst({ where: { id: { in: ids } }, select: { variante: true } }))?.variante;
+      aenderungen.produktname = produktnameOhneVariante(produktname, varianteFuerName);
     }
 
     for (const feld of [

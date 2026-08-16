@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prisma";
 import { administratorAnfordern } from "@/lib/auth-server";
+import { produktnameOhneVariante } from "@/lib/artikelname";
 
 type ImportArtikel = {
   artikelnummer?: unknown;
@@ -109,8 +110,10 @@ export async function POST(request: NextRequest) {
           eintrag.artikelnummer,
         );
 
-        const produktname = textLesen(
-          eintrag.produktname,
+        const variante = textLesen(eintrag.variante) || null;
+        const produktname = produktnameOhneVariante(
+          textLesen(eintrag.produktname),
+          variante,
         );
 
         const bestand = zahlLesen(
@@ -140,8 +143,7 @@ export async function POST(request: NextRequest) {
             textLesen(eintrag.suchbegriff) || null,
           groesse:
             textLesen(eintrag.groesse) || null,
-          variante:
-            textLesen(eintrag.variante) || null,
+          variante,
           bestand,
           reserviert,
           verfuegbar,
