@@ -40,7 +40,20 @@ export async function GET(request: NextRequest) {
         },
       });
 
-      if (vorhandener) return NextResponse.json(vorhandener);
+      if (vorhandener) {
+        const letzteBewegungen = await prisma.lagerbewegung.findMany({
+          where: {
+            OR: [
+              { ladungstraegerCode: barcode },
+              { artikelId: { in: vorhandener.positionen.map((position) => position.artikelId) } },
+            ],
+          },
+          include: { vonLagerplatz: true, nachLagerplatz: true },
+          orderBy: { erfasstAm: "desc" },
+          take: 5,
+        });
+        return NextResponse.json({ ...vorhandener, letzteBewegungen });
+      }
 
       const schluessel = ladungstraegerBarcodeLesen(barcode);
       if (!schluessel) {
@@ -60,6 +73,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ fehler: "Ladungsträger wurde nicht gefunden." }, { status: 404 });
       }
 
+      const letzteBewegungen = await prisma.lagerbewegung.findMany({
+        where: {
+          OR: [
+            { ladungstraegerCode: barcode },
+            { artikelId: artikel.id },
+          ],
+        },
+        include: { vonLagerplatz: true, nachLagerplatz: true },
+        orderBy: { erfasstAm: "desc" },
+        take: 5,
+      });
+
       return NextResponse.json({
         barcode: ladungstraegerBarcode(artikel.id, schluessel.index),
         bezeichnung: `${artikel.artikelnummer} · Träger ${schluessel.index + 1}`,
@@ -68,6 +93,7 @@ export async function GET(request: NextRequest) {
         traegerIndex: schluessel.index + 1,
         traegerGesamt: mengen.length,
         positionen: [{ artikel, menge }],
+        letzteBewegungen,
       });
     }
 
@@ -99,4 +125,3 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ fehler: "Ladungsträger konnten nicht geladen werden." }, { status: 500 });
   }
 }
-

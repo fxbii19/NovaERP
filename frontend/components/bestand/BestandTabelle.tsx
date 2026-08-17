@@ -1138,12 +1138,59 @@ function ArtikelDialog({
     benutzer?: string | null;
     href?: string;
   };
+  type TraegerDetail = {
+    barcode: string;
+    bezeichnung: string;
+    virtuell?: boolean;
+    lagerplatz: { code: string; bezeichnung: string } | null;
+    positionen: Array<{
+      menge: number;
+      artikel: DatenbankArtikel;
+    }>;
+    letzteBewegungen?: Array<{
+      id: number;
+      typ: string;
+      status: string;
+      menge: number;
+      erfasstAm: string;
+      vonLagerplatz: { code: string } | null;
+      nachLagerplatz: { code: string } | null;
+    }>;
+  };
   const [traegerDaten, setTraegerDaten] = useState<TraegerDaten | null>(null);
   const [traegerFehler, setTraegerFehler] = useState("");
   const [traegerLaedt, setTraegerLaedt] = useState(false);
   const [timeline, setTimeline] = useState<TimelineEreignis[]>([]);
   const [timelineFehler, setTimelineFehler] = useState("");
   const [timelineLaedt, setTimelineLaedt] = useState(false);
+  const [traegerDetail, setTraegerDetail] = useState<TraegerDetail | null>(null);
+  const [traegerDetailLaedt, setTraegerDetailLaedt] = useState(false);
+  const [traegerDetailFehler, setTraegerDetailFehler] = useState("");
+
+  async function traegerOeffnen(barcode: string) {
+    setTraegerDetailLaedt(true);
+    setTraegerDetailFehler("");
+    try {
+      const antwort = await fetch(`/api/lager/ladungstraeger?barcode=${encodeURIComponent(barcode)}`, { cache: "no-store" });
+      const daten = await antwort.json();
+      if (!antwort.ok) throw new Error(daten.fehler || "Ladungsträger konnte nicht geladen werden.");
+      setTraegerDetail(daten);
+    } catch (error) {
+      setTraegerDetailFehler(error instanceof Error ? error.message : "Ladungsträger konnte nicht geladen werden.");
+    } finally {
+      setTraegerDetailLaedt(false);
+    }
+  }
+
+  function etikettDrucken(detail: TraegerDetail) {
+    const fenster = window.open("", "_blank", "width=680,height=520");
+    if (!fenster) return;
+    const artikelText = detail.positionen
+      .map((position) => `${position.artikel.artikelnummer} · ${position.artikel.produktname} · ${zahlFormatieren(position.menge)} Stk.`)
+      .join("<br>");
+    fenster.document.write(`<!doctype html><html><head><title>${detail.barcode}</title><style>body{font-family:Arial,sans-serif;margin:0;padding:32px;color:#111}.label{border:3px solid #111;border-radius:16px;padding:28px;max-width:560px}.brand{font-size:14px;letter-spacing:4px;font-weight:700}.code{font-size:28px;font-weight:800;margin-top:22px}.bars{height:90px;margin:18px 0;background:repeating-linear-gradient(90deg,#111 0 3px,transparent 3px 6px,#111 6px 8px,transparent 8px 12px)}.meta{font-size:16px;line-height:1.7}.place{margin-top:18px;font-size:22px;font-weight:700}@media print{body{padding:0}.label{border-color:#000}}</style></head><body><div class="label"><div class="brand">NOVA ERP · LADUNGSTRÄGER</div><div class="code">${detail.barcode}</div><div class="bars"></div><div class="meta">${artikelText}</div><div class="place">Lagerplatz: ${detail.lagerplatz?.code ?? "Nicht zugeordnet"}</div></div><script>window.onload=()=>window.print()</script></body></html>`);
+    fenster.document.close();
+  }
 
   useEffect(() => {
     if (!artikel) {
@@ -1289,10 +1336,10 @@ function ArtikelDialog({
               <div className="max-h-56 overflow-y-auto p-3">
                 <div className="grid gap-2 sm:grid-cols-2">
                   {traegerDaten.ladungstraeger.map((traeger) => (
-                    <div key={traeger.barcode} className="flex items-center justify-between rounded-lg border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] px-3 py-2 text-sm">
+                    <button type="button" onClick={() => void traegerOeffnen(traeger.barcode)} key={traeger.barcode} className="flex items-center justify-between rounded-lg border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] px-3 py-2 text-left text-sm transition hover:border-[var(--nova-akzent)] hover:bg-[var(--nova-akzent-transparent)]">
                       <code className="text-[var(--nova-akzent)]">{traeger.barcode}</code>
-                      <b>{zahlFormatieren(traeger.menge)} Stk.</b>
-                    </div>
+                      <span className="flex items-center gap-2"><b>{zahlFormatieren(traeger.menge)} Stk.</b><span aria-hidden="true">→</span></span>
+                    </button>
                   ))}
                 </div>
                 {traegerDaten.ladungstraeger.length === 0 && (
@@ -1345,6 +1392,32 @@ function ArtikelDialog({
 
         {fehler && <p className="mx-6 mb-4 rounded-xl bg-red-950/50 p-3 text-sm text-red-300">{fehler}</p>}
 
+        {(traegerDetailLaedt || traegerDetailFehler || traegerDetail) && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-5 backdrop-blur-sm" onMouseDown={(event) => { if (event.currentTarget === event.target) { setTraegerDetail(null); setTraegerDetailFehler(""); } }}>
+            <div className="max-h-[88vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-[var(--nova-rand)] bg-[var(--nova-flaeche)] shadow-2xl">
+              <div className="flex items-start justify-between border-b border-[var(--nova-rand)] px-6 py-5">
+                <div><p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--nova-akzent)]">Ladungsträger</p><h3 className="mt-1 text-2xl font-bold">{traegerDetail?.barcode ?? "Details werden geladen"}</h3></div>
+                <button type="button" onClick={() => { setTraegerDetail(null); setTraegerDetailFehler(""); }} className="rounded-lg px-3 py-2 text-xl hover:bg-[var(--nova-flaeche-hover)]">×</button>
+              </div>
+              {traegerDetailLaedt && <p className="p-6 text-[var(--nova-text-schwaecher)]">Ladungsträger wird geladen …</p>}
+              {traegerDetailFehler && <p className="m-6 rounded-xl bg-red-500/15 p-4 text-red-400">{traegerDetailFehler}</p>}
+              {traegerDetail && (
+                <div className="space-y-5 p-6">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <DetailKennzahl label="Lagerplatz" wert={traegerDetail.lagerplatz?.code ?? "Nicht zugeordnet"} />
+                    <DetailKennzahl label="Menge" wert={`${zahlFormatieren(traegerDetail.positionen.reduce((summe, position) => summe + position.menge, 0))} Stk.`} />
+                    <DetailKennzahl label="Status" wert={traegerDetail.lagerplatz ? "Verfügbar" : "Nicht zugeordnet"} />
+                  </div>
+                  <div className="rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-hintergrund)] p-4"><p className="text-xs uppercase tracking-wider text-[var(--nova-text-schwaecher)]">Barcode-Etikett</p><div className="mt-3 h-16 rounded bg-[repeating-linear-gradient(90deg,var(--nova-text)_0_3px,transparent_3px_6px,var(--nova-text)_6px_8px,transparent_8px_12px)]" /><code className="mt-2 block text-center text-lg font-bold tracking-widest">{traegerDetail.barcode}</code></div>
+                  <div><h4 className="font-semibold">Inhalt</h4><div className="mt-2 divide-y divide-[var(--nova-rand)] rounded-xl border border-[var(--nova-rand)]">{traegerDetail.positionen.map((position) => <div key={position.artikel.id} className="flex justify-between gap-4 p-3 text-sm"><span><b>{position.artikel.artikelnummer}</b><small className="block text-[var(--nova-text-schwaecher)]">{position.artikel.produktname} · {position.artikel.groesse ?? "–"} · {position.artikel.variante ?? "–"}</small></span><b>{zahlFormatieren(position.menge)} Stk.</b></div>)}</div></div>
+                  <div><h4 className="font-semibold">Letzte Bewegungen</h4><div className="mt-2 space-y-2">{(traegerDetail.letzteBewegungen ?? []).map((bewegung) => <div key={bewegung.id} className="flex justify-between gap-4 rounded-xl border border-[var(--nova-rand)] p-3 text-sm"><span><b>{bewegung.typ}</b><small className="block text-[var(--nova-text-schwaecher)]">{bewegung.vonLagerplatz?.code ?? "Eingang"} → {bewegung.nachLagerplatz?.code ?? "Ausgang"}</small></span><span className="text-right"><b>{zahlFormatieren(bewegung.menge)} Stk.</b><small className="block text-[var(--nova-text-schwaecher)]">{new Date(bewegung.erfasstAm).toLocaleString("de-DE")}</small></span></div>)}{(traegerDetail.letzteBewegungen ?? []).length === 0 && <p className="text-sm text-[var(--nova-text-schwaecher)]">Noch keine Bewegung dokumentiert.</p>}</div></div>
+                  <div className="flex flex-wrap justify-end gap-3"><button type="button" onClick={() => etikettDrucken(traegerDetail)} className="rounded-xl border border-[var(--nova-rand)] px-4 py-3 text-sm font-semibold hover:bg-[var(--nova-flaeche-hover)]">Etikett drucken</button><Link href={`/lager/umlagerungen?ladungstraeger=${encodeURIComponent(traegerDetail.barcode)}`} className="rounded-xl bg-[var(--nova-akzent)] px-4 py-3 text-sm font-semibold text-white">Umlagern →</Link></div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-end gap-3 border-t border-[var(--nova-rand)] px-6 py-5">
           <button
             type="button"
@@ -1367,4 +1440,8 @@ function ArtikelDialog({
       </div>
     </div>
   );
+}
+
+function DetailKennzahl({ label, wert }: { label: string; wert: string }) {
+  return <div className="rounded-xl border border-[var(--nova-rand)] bg-[var(--nova-hintergrund)] p-4"><span className="text-xs text-[var(--nova-text-schwaecher)]">{label}</span><p className="mt-1 font-semibold text-[var(--nova-text)]">{wert}</p></div>;
 }

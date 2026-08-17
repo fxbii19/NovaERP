@@ -102,6 +102,18 @@ export default function LagerModul({ modus }: { modus: LagerModus }) {
 
   useEffect(() => void laden(), [laden]);
 
+  useEffect(() => {
+    if (modus !== "umlagerungen") return;
+
+    const ladungstraegerCode = new URLSearchParams(window.location.search).get(
+      "ladungstraeger",
+    );
+
+    if (ladungstraegerCode) {
+      setFormular((alt) => ({ ...alt, ladungstraegerCode }));
+    }
+  }, [modus]);
+
   async function aktionSenden(aktion: string, zusaetzlich: Record<string, unknown> = {}) {
     setFehler(null);
     setMeldung(null);
