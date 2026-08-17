@@ -102,6 +102,21 @@ export type Sperrbestand = Prisma.SperrbestandModel
  */
 export type Konfektionsauftrag = Prisma.KonfektionsauftragModel
 /**
+ * Model Konfektionaer
+ * 
+ */
+export type Konfektionaer = Prisma.KonfektionaerModel
+/**
+ * Model KonfektionaerBestand
+ * 
+ */
+export type KonfektionaerBestand = Prisma.KonfektionaerBestandModel
+/**
+ * Model KonfektionaerSendung
+ * 
+ */
+export type KonfektionaerSendung = Prisma.KonfektionaerSendungModel
+/**
  * Model Logistikauftrag
  * 
  */

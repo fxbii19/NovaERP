@@ -39,6 +39,8 @@ model Artikel {
   pruefauftraege           Pruefauftrag[]
   sperrbestaende           Sperrbestand[]
   konfektionsauftraege     Konfektionsauftrag[]
+  konfektionaerBestaende   KonfektionaerBestand[]
+  konfektionaerSendungen   KonfektionaerSendung[]
   logistikpositionen       Logistikposition[]
   dispositionsvorschlaege  Dispositionsvorschlag[]
 
@@ -251,6 +253,60 @@ model Konfektionsauftrag {
   artikel        Artikel     @relation(fields: [artikelId], references: [id])
   vonLagerplatz  Lagerplatz? @relation("KonfektionVon", fields: [vonLagerplatzId], references: [id])
   nachLagerplatz Lagerplatz? @relation("KonfektionNach", fields: [nachLagerplatzId], references: [id])
+
+  @@index([status])
+}
+
+model Konfektionaer {
+  id              Int      @id @default(autoincrement())
+  nummer          String   @unique
+  name            String
+  ansprechpartner String?
+  email           String?
+  telefon         String?
+  adresse         String?
+  aktiv           Boolean  @default(true)
+  erstelltAm      DateTime @default(now())
+  aktualisiertAm  DateTime @updatedAt
+
+  bestaende KonfektionaerBestand[]
+  sendungen KonfektionaerSendung[]
+
+  @@index([name])
+}
+
+model KonfektionaerBestand {
+  id              Int      @id @default(autoincrement())
+  konfektionaerId Int
+  artikelId       Int
+  menge           Float    @default(0)
+  aktualisiertAm  DateTime @updatedAt
+
+  konfektionaer Konfektionaer @relation(fields: [konfektionaerId], references: [id], onDelete: Cascade)
+  artikel       Artikel       @relation(fields: [artikelId], references: [id])
+
+  @@unique([konfektionaerId, artikelId])
+}
+
+model KonfektionaerSendung {
+  id              Int       @id @default(autoincrement())
+  sendungsnummer  String    @unique
+  konfektionaerId Int
+  artikelId       Int
+  menge           Float
+  status          String    @default("ZUR_FREIGABE")
+  freigegebenVon  String?
+  freigegebenAm   DateTime?
+  versandtVon     String?
+  versandtAm      DateTime?
+  rueckmeldeMenge Float     @default(0)
+  ausschussMenge  Float     @default(0)
+  notiz           String?
+  erstelltAm      DateTime  @default(now())
+  abgeschlossenAm DateTime?
+
+  konfektionaer Konfektionaer @relation(fields: [konfektionaerId], references: [id])
+  artikel       Artikel       @relation(fields: [artikelId], references: [id])
 
   @@index([status])
 }
@@ -670,7 +726,7 @@ model Systemprotokoll {
   objektTyp  String?
   objektId   String?
   alterWert  String?
-  neuerWert String?
+  neuerWert  String?
   grund      String?
   erstelltAm DateTime @default(now())
 

@@ -63,6 +63,9 @@ export const ModelName = {
   Qualitaetsfreigabe: 'Qualitaetsfreigabe',
   Sperrbestand: 'Sperrbestand',
   Konfektionsauftrag: 'Konfektionsauftrag',
+  Konfektionaer: 'Konfektionaer',
+  KonfektionaerBestand: 'KonfektionaerBestand',
+  KonfektionaerSendung: 'KonfektionaerSendung',
   Logistikauftrag: 'Logistikauftrag',
   Logistikposition: 'Logistikposition',
   Kommissionierung: 'Kommissionierung',
@@ -307,6 +310,54 @@ export const KonfektionsauftragScalarFieldEnum = {
 } as const
 
 export type KonfektionsauftragScalarFieldEnum = (typeof KonfektionsauftragScalarFieldEnum)[keyof typeof KonfektionsauftragScalarFieldEnum]
+
+
+export const KonfektionaerScalarFieldEnum = {
+  id: 'id',
+  nummer: 'nummer',
+  name: 'name',
+  ansprechpartner: 'ansprechpartner',
+  email: 'email',
+  telefon: 'telefon',
+  adresse: 'adresse',
+  aktiv: 'aktiv',
+  erstelltAm: 'erstelltAm',
+  aktualisiertAm: 'aktualisiertAm'
+} as const
+
+export type KonfektionaerScalarFieldEnum = (typeof KonfektionaerScalarFieldEnum)[keyof typeof KonfektionaerScalarFieldEnum]
+
+
+export const KonfektionaerBestandScalarFieldEnum = {
+  id: 'id',
+  konfektionaerId: 'konfektionaerId',
+  artikelId: 'artikelId',
+  menge: 'menge',
+  aktualisiertAm: 'aktualisiertAm'
+} as const
+
+export type KonfektionaerBestandScalarFieldEnum = (typeof KonfektionaerBestandScalarFieldEnum)[keyof typeof KonfektionaerBestandScalarFieldEnum]
+
+
+export const KonfektionaerSendungScalarFieldEnum = {
+  id: 'id',
+  sendungsnummer: 'sendungsnummer',
+  konfektionaerId: 'konfektionaerId',
+  artikelId: 'artikelId',
+  menge: 'menge',
+  status: 'status',
+  freigegebenVon: 'freigegebenVon',
+  freigegebenAm: 'freigegebenAm',
+  versandtVon: 'versandtVon',
+  versandtAm: 'versandtAm',
+  rueckmeldeMenge: 'rueckmeldeMenge',
+  ausschussMenge: 'ausschussMenge',
+  notiz: 'notiz',
+  erstelltAm: 'erstelltAm',
+  abgeschlossenAm: 'abgeschlossenAm'
+} as const
+
+export type KonfektionaerSendungScalarFieldEnum = (typeof KonfektionaerSendungScalarFieldEnum)[keyof typeof KonfektionaerSendungScalarFieldEnum]
 
 
 export const LogistikauftragScalarFieldEnum = {

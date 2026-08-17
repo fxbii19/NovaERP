@@ -371,6 +371,8 @@ export type ArtikelWhereInput = {
   pruefauftraege?: Prisma.PruefauftragListRelationFilter
   sperrbestaende?: Prisma.SperrbestandListRelationFilter
   konfektionsauftraege?: Prisma.KonfektionsauftragListRelationFilter
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandListRelationFilter
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungListRelationFilter
   logistikpositionen?: Prisma.LogistikpositionListRelationFilter
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagListRelationFilter
 }
@@ -403,6 +405,8 @@ export type ArtikelOrderByWithRelationInput = {
   pruefauftraege?: Prisma.PruefauftragOrderByRelationAggregateInput
   sperrbestaende?: Prisma.SperrbestandOrderByRelationAggregateInput
   konfektionsauftraege?: Prisma.KonfektionsauftragOrderByRelationAggregateInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandOrderByRelationAggregateInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungOrderByRelationAggregateInput
   logistikpositionen?: Prisma.LogistikpositionOrderByRelationAggregateInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagOrderByRelationAggregateInput
 }
@@ -438,6 +442,8 @@ export type ArtikelWhereUniqueInput = Prisma.AtLeast<{
   pruefauftraege?: Prisma.PruefauftragListRelationFilter
   sperrbestaende?: Prisma.SperrbestandListRelationFilter
   konfektionsauftraege?: Prisma.KonfektionsauftragListRelationFilter
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandListRelationFilter
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungListRelationFilter
   logistikpositionen?: Prisma.LogistikpositionListRelationFilter
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagListRelationFilter
 }, "id" | "artikelnummer">
@@ -523,6 +529,8 @@ export type ArtikelCreateInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -555,6 +563,8 @@ export type ArtikelUncheckedCreateInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -586,6 +596,8 @@ export type ArtikelUpdateInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -618,6 +630,8 @@ export type ArtikelUncheckedUpdateInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -916,6 +930,34 @@ export type ArtikelUpdateOneRequiredWithoutKonfektionsauftraegeNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ArtikelUpdateToOneWithWhereWithoutKonfektionsauftraegeInput, Prisma.ArtikelUpdateWithoutKonfektionsauftraegeInput>, Prisma.ArtikelUncheckedUpdateWithoutKonfektionsauftraegeInput>
 }
 
+export type ArtikelCreateNestedOneWithoutKonfektionaerBestaendeInput = {
+  create?: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerBestaendeInput>
+  connectOrCreate?: Prisma.ArtikelCreateOrConnectWithoutKonfektionaerBestaendeInput
+  connect?: Prisma.ArtikelWhereUniqueInput
+}
+
+export type ArtikelUpdateOneRequiredWithoutKonfektionaerBestaendeNestedInput = {
+  create?: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerBestaendeInput>
+  connectOrCreate?: Prisma.ArtikelCreateOrConnectWithoutKonfektionaerBestaendeInput
+  upsert?: Prisma.ArtikelUpsertWithoutKonfektionaerBestaendeInput
+  connect?: Prisma.ArtikelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ArtikelUpdateToOneWithWhereWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUpdateWithoutKonfektionaerBestaendeInput>, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerBestaendeInput>
+}
+
+export type ArtikelCreateNestedOneWithoutKonfektionaerSendungenInput = {
+  create?: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerSendungenInput>
+  connectOrCreate?: Prisma.ArtikelCreateOrConnectWithoutKonfektionaerSendungenInput
+  connect?: Prisma.ArtikelWhereUniqueInput
+}
+
+export type ArtikelUpdateOneRequiredWithoutKonfektionaerSendungenNestedInput = {
+  create?: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerSendungenInput>
+  connectOrCreate?: Prisma.ArtikelCreateOrConnectWithoutKonfektionaerSendungenInput
+  upsert?: Prisma.ArtikelUpsertWithoutKonfektionaerSendungenInput
+  connect?: Prisma.ArtikelWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ArtikelUpdateToOneWithWhereWithoutKonfektionaerSendungenInput, Prisma.ArtikelUpdateWithoutKonfektionaerSendungenInput>, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerSendungenInput>
+}
+
 export type ArtikelCreateNestedOneWithoutLogistikpositionenInput = {
   create?: Prisma.XOR<Prisma.ArtikelCreateWithoutLogistikpositionenInput, Prisma.ArtikelUncheckedCreateWithoutLogistikpositionenInput>
   connectOrCreate?: Prisma.ArtikelCreateOrConnectWithoutLogistikpositionenInput
@@ -970,6 +1012,8 @@ export type ArtikelCreateWithoutLagerbestaendeInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1001,6 +1045,8 @@ export type ArtikelUncheckedCreateWithoutLagerbestaendeInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1047,6 +1093,8 @@ export type ArtikelUpdateWithoutLagerbestaendeInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1078,6 +1126,8 @@ export type ArtikelUncheckedUpdateWithoutLagerbestaendeInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1108,6 +1158,8 @@ export type ArtikelCreateWithoutLagerbewegungenInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1139,6 +1191,8 @@ export type ArtikelUncheckedCreateWithoutLagerbewegungenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1185,6 +1239,8 @@ export type ArtikelUpdateWithoutLagerbewegungenInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1216,6 +1272,8 @@ export type ArtikelUncheckedUpdateWithoutLagerbewegungenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1246,6 +1304,8 @@ export type ArtikelCreateWithoutLadungstraegerPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1277,6 +1337,8 @@ export type ArtikelUncheckedCreateWithoutLadungstraegerPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1323,6 +1385,8 @@ export type ArtikelUpdateWithoutLadungstraegerPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1354,6 +1418,8 @@ export type ArtikelUncheckedUpdateWithoutLadungstraegerPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1384,6 +1450,8 @@ export type ArtikelCreateWithoutInventurPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1415,6 +1483,8 @@ export type ArtikelUncheckedCreateWithoutInventurPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1461,6 +1531,8 @@ export type ArtikelUpdateWithoutInventurPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1492,6 +1564,8 @@ export type ArtikelUncheckedUpdateWithoutInventurPositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1522,6 +1596,8 @@ export type ArtikelCreateWithoutPruefauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1553,6 +1629,8 @@ export type ArtikelUncheckedCreateWithoutPruefauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1599,6 +1677,8 @@ export type ArtikelUpdateWithoutPruefauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1630,6 +1710,8 @@ export type ArtikelUncheckedUpdateWithoutPruefauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1660,6 +1742,8 @@ export type ArtikelCreateWithoutSperrbestaendeInput = {
   inventurPositionen?: Prisma.InventurPositionCreateNestedManyWithoutArtikelInput
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1691,6 +1775,8 @@ export type ArtikelUncheckedCreateWithoutSperrbestaendeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedCreateNestedManyWithoutArtikelInput
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1737,6 +1823,8 @@ export type ArtikelUpdateWithoutSperrbestaendeInput = {
   inventurPositionen?: Prisma.InventurPositionUpdateManyWithoutArtikelNestedInput
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1768,6 +1856,8 @@ export type ArtikelUncheckedUpdateWithoutSperrbestaendeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedUpdateManyWithoutArtikelNestedInput
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1798,6 +1888,8 @@ export type ArtikelCreateWithoutKonfektionsauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionCreateNestedManyWithoutArtikelInput
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
@@ -1829,6 +1921,8 @@ export type ArtikelUncheckedCreateWithoutKonfektionsauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedCreateNestedManyWithoutArtikelInput
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
@@ -1875,6 +1969,8 @@ export type ArtikelUpdateWithoutKonfektionsauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUpdateManyWithoutArtikelNestedInput
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
@@ -1906,6 +2002,300 @@ export type ArtikelUncheckedUpdateWithoutKonfektionsauftraegeInput = {
   inventurPositionen?: Prisma.InventurPositionUncheckedUpdateManyWithoutArtikelNestedInput
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
+  logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
+}
+
+export type ArtikelCreateWithoutKonfektionaerBestaendeInput = {
+  artikelnummer: string
+  produktname: string
+  suchbegriff?: string | null
+  groesse?: string | null
+  variante?: string | null
+  bestand?: number
+  reserviert?: number
+  verfuegbar?: number
+  bestellt?: number
+  inAuftrag?: number
+  mindestbestand?: number
+  verkaufspreis?: number
+  lagerplatz?: string | null
+  einheit?: string | null
+  gesperrt?: boolean
+  lagerortverwaltung?: boolean
+  aktiv?: boolean
+  erstelltAm?: Date | string
+  aktualisiertAm?: Date | string
+  lagerbestaende?: Prisma.LagerbestandCreateNestedManyWithoutArtikelInput
+  lagerbewegungen?: Prisma.LagerbewegungCreateNestedManyWithoutArtikelInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionCreateNestedManyWithoutArtikelInput
+  inventurPositionen?: Prisma.InventurPositionCreateNestedManyWithoutArtikelInput
+  pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
+  sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
+  logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
+}
+
+export type ArtikelUncheckedCreateWithoutKonfektionaerBestaendeInput = {
+  id?: number
+  artikelnummer: string
+  produktname: string
+  suchbegriff?: string | null
+  groesse?: string | null
+  variante?: string | null
+  bestand?: number
+  reserviert?: number
+  verfuegbar?: number
+  bestellt?: number
+  inAuftrag?: number
+  mindestbestand?: number
+  verkaufspreis?: number
+  lagerplatz?: string | null
+  einheit?: string | null
+  gesperrt?: boolean
+  lagerortverwaltung?: boolean
+  aktiv?: boolean
+  erstelltAm?: Date | string
+  aktualisiertAm?: Date | string
+  lagerbestaende?: Prisma.LagerbestandUncheckedCreateNestedManyWithoutArtikelInput
+  lagerbewegungen?: Prisma.LagerbewegungUncheckedCreateNestedManyWithoutArtikelInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUncheckedCreateNestedManyWithoutArtikelInput
+  inventurPositionen?: Prisma.InventurPositionUncheckedCreateNestedManyWithoutArtikelInput
+  pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
+  sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
+  logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
+}
+
+export type ArtikelCreateOrConnectWithoutKonfektionaerBestaendeInput = {
+  where: Prisma.ArtikelWhereUniqueInput
+  create: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerBestaendeInput>
+}
+
+export type ArtikelUpsertWithoutKonfektionaerBestaendeInput = {
+  update: Prisma.XOR<Prisma.ArtikelUpdateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerBestaendeInput>
+  create: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerBestaendeInput>
+  where?: Prisma.ArtikelWhereInput
+}
+
+export type ArtikelUpdateToOneWithWhereWithoutKonfektionaerBestaendeInput = {
+  where?: Prisma.ArtikelWhereInput
+  data: Prisma.XOR<Prisma.ArtikelUpdateWithoutKonfektionaerBestaendeInput, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerBestaendeInput>
+}
+
+export type ArtikelUpdateWithoutKonfektionaerBestaendeInput = {
+  artikelnummer?: Prisma.StringFieldUpdateOperationsInput | string
+  produktname?: Prisma.StringFieldUpdateOperationsInput | string
+  suchbegriff?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groesse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  reserviert?: Prisma.FloatFieldUpdateOperationsInput | number
+  verfuegbar?: Prisma.FloatFieldUpdateOperationsInput | number
+  bestellt?: Prisma.FloatFieldUpdateOperationsInput | number
+  inAuftrag?: Prisma.FloatFieldUpdateOperationsInput | number
+  mindestbestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  verkaufspreis?: Prisma.FloatFieldUpdateOperationsInput | number
+  lagerplatz?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  einheit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gesperrt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lagerortverwaltung?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aktiv?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  erstelltAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aktualisiertAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lagerbestaende?: Prisma.LagerbestandUpdateManyWithoutArtikelNestedInput
+  lagerbewegungen?: Prisma.LagerbewegungUpdateManyWithoutArtikelNestedInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUpdateManyWithoutArtikelNestedInput
+  inventurPositionen?: Prisma.InventurPositionUpdateManyWithoutArtikelNestedInput
+  pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
+  sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
+  logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
+}
+
+export type ArtikelUncheckedUpdateWithoutKonfektionaerBestaendeInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  artikelnummer?: Prisma.StringFieldUpdateOperationsInput | string
+  produktname?: Prisma.StringFieldUpdateOperationsInput | string
+  suchbegriff?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groesse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  reserviert?: Prisma.FloatFieldUpdateOperationsInput | number
+  verfuegbar?: Prisma.FloatFieldUpdateOperationsInput | number
+  bestellt?: Prisma.FloatFieldUpdateOperationsInput | number
+  inAuftrag?: Prisma.FloatFieldUpdateOperationsInput | number
+  mindestbestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  verkaufspreis?: Prisma.FloatFieldUpdateOperationsInput | number
+  lagerplatz?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  einheit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gesperrt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lagerortverwaltung?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aktiv?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  erstelltAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aktualisiertAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lagerbestaende?: Prisma.LagerbestandUncheckedUpdateManyWithoutArtikelNestedInput
+  lagerbewegungen?: Prisma.LagerbewegungUncheckedUpdateManyWithoutArtikelNestedInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUncheckedUpdateManyWithoutArtikelNestedInput
+  inventurPositionen?: Prisma.InventurPositionUncheckedUpdateManyWithoutArtikelNestedInput
+  pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
+  logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
+}
+
+export type ArtikelCreateWithoutKonfektionaerSendungenInput = {
+  artikelnummer: string
+  produktname: string
+  suchbegriff?: string | null
+  groesse?: string | null
+  variante?: string | null
+  bestand?: number
+  reserviert?: number
+  verfuegbar?: number
+  bestellt?: number
+  inAuftrag?: number
+  mindestbestand?: number
+  verkaufspreis?: number
+  lagerplatz?: string | null
+  einheit?: string | null
+  gesperrt?: boolean
+  lagerortverwaltung?: boolean
+  aktiv?: boolean
+  erstelltAm?: Date | string
+  aktualisiertAm?: Date | string
+  lagerbestaende?: Prisma.LagerbestandCreateNestedManyWithoutArtikelInput
+  lagerbewegungen?: Prisma.LagerbewegungCreateNestedManyWithoutArtikelInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionCreateNestedManyWithoutArtikelInput
+  inventurPositionen?: Prisma.InventurPositionCreateNestedManyWithoutArtikelInput
+  pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
+  sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
+}
+
+export type ArtikelUncheckedCreateWithoutKonfektionaerSendungenInput = {
+  id?: number
+  artikelnummer: string
+  produktname: string
+  suchbegriff?: string | null
+  groesse?: string | null
+  variante?: string | null
+  bestand?: number
+  reserviert?: number
+  verfuegbar?: number
+  bestellt?: number
+  inAuftrag?: number
+  mindestbestand?: number
+  verkaufspreis?: number
+  lagerplatz?: string | null
+  einheit?: string | null
+  gesperrt?: boolean
+  lagerortverwaltung?: boolean
+  aktiv?: boolean
+  erstelltAm?: Date | string
+  aktualisiertAm?: Date | string
+  lagerbestaende?: Prisma.LagerbestandUncheckedCreateNestedManyWithoutArtikelInput
+  lagerbewegungen?: Prisma.LagerbewegungUncheckedCreateNestedManyWithoutArtikelInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUncheckedCreateNestedManyWithoutArtikelInput
+  inventurPositionen?: Prisma.InventurPositionUncheckedCreateNestedManyWithoutArtikelInput
+  pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
+  sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
+}
+
+export type ArtikelCreateOrConnectWithoutKonfektionaerSendungenInput = {
+  where: Prisma.ArtikelWhereUniqueInput
+  create: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerSendungenInput>
+}
+
+export type ArtikelUpsertWithoutKonfektionaerSendungenInput = {
+  update: Prisma.XOR<Prisma.ArtikelUpdateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerSendungenInput>
+  create: Prisma.XOR<Prisma.ArtikelCreateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedCreateWithoutKonfektionaerSendungenInput>
+  where?: Prisma.ArtikelWhereInput
+}
+
+export type ArtikelUpdateToOneWithWhereWithoutKonfektionaerSendungenInput = {
+  where?: Prisma.ArtikelWhereInput
+  data: Prisma.XOR<Prisma.ArtikelUpdateWithoutKonfektionaerSendungenInput, Prisma.ArtikelUncheckedUpdateWithoutKonfektionaerSendungenInput>
+}
+
+export type ArtikelUpdateWithoutKonfektionaerSendungenInput = {
+  artikelnummer?: Prisma.StringFieldUpdateOperationsInput | string
+  produktname?: Prisma.StringFieldUpdateOperationsInput | string
+  suchbegriff?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groesse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  reserviert?: Prisma.FloatFieldUpdateOperationsInput | number
+  verfuegbar?: Prisma.FloatFieldUpdateOperationsInput | number
+  bestellt?: Prisma.FloatFieldUpdateOperationsInput | number
+  inAuftrag?: Prisma.FloatFieldUpdateOperationsInput | number
+  mindestbestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  verkaufspreis?: Prisma.FloatFieldUpdateOperationsInput | number
+  lagerplatz?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  einheit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gesperrt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lagerortverwaltung?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aktiv?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  erstelltAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aktualisiertAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lagerbestaende?: Prisma.LagerbestandUpdateManyWithoutArtikelNestedInput
+  lagerbewegungen?: Prisma.LagerbewegungUpdateManyWithoutArtikelNestedInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUpdateManyWithoutArtikelNestedInput
+  inventurPositionen?: Prisma.InventurPositionUpdateManyWithoutArtikelNestedInput
+  pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
+  sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
+  dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
+}
+
+export type ArtikelUncheckedUpdateWithoutKonfektionaerSendungenInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  artikelnummer?: Prisma.StringFieldUpdateOperationsInput | string
+  produktname?: Prisma.StringFieldUpdateOperationsInput | string
+  suchbegriff?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  groesse?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  variante?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  reserviert?: Prisma.FloatFieldUpdateOperationsInput | number
+  verfuegbar?: Prisma.FloatFieldUpdateOperationsInput | number
+  bestellt?: Prisma.FloatFieldUpdateOperationsInput | number
+  inAuftrag?: Prisma.FloatFieldUpdateOperationsInput | number
+  mindestbestand?: Prisma.FloatFieldUpdateOperationsInput | number
+  verkaufspreis?: Prisma.FloatFieldUpdateOperationsInput | number
+  lagerplatz?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  einheit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gesperrt?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  lagerortverwaltung?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  aktiv?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  erstelltAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  aktualisiertAm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  lagerbestaende?: Prisma.LagerbestandUncheckedUpdateManyWithoutArtikelNestedInput
+  lagerbewegungen?: Prisma.LagerbewegungUncheckedUpdateManyWithoutArtikelNestedInput
+  ladungstraegerPositionen?: Prisma.LadungstraegerPositionUncheckedUpdateManyWithoutArtikelNestedInput
+  inventurPositionen?: Prisma.InventurPositionUncheckedUpdateManyWithoutArtikelNestedInput
+  pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
@@ -1937,6 +2327,8 @@ export type ArtikelCreateWithoutLogistikpositionenInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagCreateNestedManyWithoutArtikelInput
 }
 
@@ -1968,6 +2360,8 @@ export type ArtikelUncheckedCreateWithoutLogistikpositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedCreateNestedManyWithoutArtikelInput
 }
 
@@ -2014,6 +2408,8 @@ export type ArtikelUpdateWithoutLogistikpositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUpdateManyWithoutArtikelNestedInput
 }
 
@@ -2045,6 +2441,8 @@ export type ArtikelUncheckedUpdateWithoutLogistikpositionenInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   dispositionsvorschlaege?: Prisma.DispositionsvorschlagUncheckedUpdateManyWithoutArtikelNestedInput
 }
 
@@ -2075,6 +2473,8 @@ export type ArtikelCreateWithoutDispositionsvorschlaegeInput = {
   pruefauftraege?: Prisma.PruefauftragCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionCreateNestedManyWithoutArtikelInput
 }
 
@@ -2106,6 +2506,8 @@ export type ArtikelUncheckedCreateWithoutDispositionsvorschlaegeInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedCreateNestedManyWithoutArtikelInput
   sperrbestaende?: Prisma.SperrbestandUncheckedCreateNestedManyWithoutArtikelInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedCreateNestedManyWithoutArtikelInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedCreateNestedManyWithoutArtikelInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedCreateNestedManyWithoutArtikelInput
 }
 
@@ -2152,6 +2554,8 @@ export type ArtikelUpdateWithoutDispositionsvorschlaegeInput = {
   pruefauftraege?: Prisma.PruefauftragUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUpdateManyWithoutArtikelNestedInput
 }
 
@@ -2183,6 +2587,8 @@ export type ArtikelUncheckedUpdateWithoutDispositionsvorschlaegeInput = {
   pruefauftraege?: Prisma.PruefauftragUncheckedUpdateManyWithoutArtikelNestedInput
   sperrbestaende?: Prisma.SperrbestandUncheckedUpdateManyWithoutArtikelNestedInput
   konfektionsauftraege?: Prisma.KonfektionsauftragUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerBestaende?: Prisma.KonfektionaerBestandUncheckedUpdateManyWithoutArtikelNestedInput
+  konfektionaerSendungen?: Prisma.KonfektionaerSendungUncheckedUpdateManyWithoutArtikelNestedInput
   logistikpositionen?: Prisma.LogistikpositionUncheckedUpdateManyWithoutArtikelNestedInput
 }
 
@@ -2199,6 +2605,8 @@ export type ArtikelCountOutputType = {
   pruefauftraege: number
   sperrbestaende: number
   konfektionsauftraege: number
+  konfektionaerBestaende: number
+  konfektionaerSendungen: number
   logistikpositionen: number
   dispositionsvorschlaege: number
 }
@@ -2211,6 +2619,8 @@ export type ArtikelCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   pruefauftraege?: boolean | ArtikelCountOutputTypeCountPruefauftraegeArgs
   sperrbestaende?: boolean | ArtikelCountOutputTypeCountSperrbestaendeArgs
   konfektionsauftraege?: boolean | ArtikelCountOutputTypeCountKonfektionsauftraegeArgs
+  konfektionaerBestaende?: boolean | ArtikelCountOutputTypeCountKonfektionaerBestaendeArgs
+  konfektionaerSendungen?: boolean | ArtikelCountOutputTypeCountKonfektionaerSendungenArgs
   logistikpositionen?: boolean | ArtikelCountOutputTypeCountLogistikpositionenArgs
   dispositionsvorschlaege?: boolean | ArtikelCountOutputTypeCountDispositionsvorschlaegeArgs
 }
@@ -2277,6 +2687,20 @@ export type ArtikelCountOutputTypeCountKonfektionsauftraegeArgs<ExtArgs extends 
 /**
  * ArtikelCountOutputType without action
  */
+export type ArtikelCountOutputTypeCountKonfektionaerBestaendeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KonfektionaerBestandWhereInput
+}
+
+/**
+ * ArtikelCountOutputType without action
+ */
+export type ArtikelCountOutputTypeCountKonfektionaerSendungenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.KonfektionaerSendungWhereInput
+}
+
+/**
+ * ArtikelCountOutputType without action
+ */
 export type ArtikelCountOutputTypeCountLogistikpositionenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LogistikpositionWhereInput
 }
@@ -2317,6 +2741,8 @@ export type ArtikelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   pruefauftraege?: boolean | Prisma.Artikel$pruefauftraegeArgs<ExtArgs>
   sperrbestaende?: boolean | Prisma.Artikel$sperrbestaendeArgs<ExtArgs>
   konfektionsauftraege?: boolean | Prisma.Artikel$konfektionsauftraegeArgs<ExtArgs>
+  konfektionaerBestaende?: boolean | Prisma.Artikel$konfektionaerBestaendeArgs<ExtArgs>
+  konfektionaerSendungen?: boolean | Prisma.Artikel$konfektionaerSendungenArgs<ExtArgs>
   logistikpositionen?: boolean | Prisma.Artikel$logistikpositionenArgs<ExtArgs>
   dispositionsvorschlaege?: boolean | Prisma.Artikel$dispositionsvorschlaegeArgs<ExtArgs>
   _count?: boolean | Prisma.ArtikelCountOutputTypeDefaultArgs<ExtArgs>
@@ -2400,6 +2826,8 @@ export type ArtikelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   pruefauftraege?: boolean | Prisma.Artikel$pruefauftraegeArgs<ExtArgs>
   sperrbestaende?: boolean | Prisma.Artikel$sperrbestaendeArgs<ExtArgs>
   konfektionsauftraege?: boolean | Prisma.Artikel$konfektionsauftraegeArgs<ExtArgs>
+  konfektionaerBestaende?: boolean | Prisma.Artikel$konfektionaerBestaendeArgs<ExtArgs>
+  konfektionaerSendungen?: boolean | Prisma.Artikel$konfektionaerSendungenArgs<ExtArgs>
   logistikpositionen?: boolean | Prisma.Artikel$logistikpositionenArgs<ExtArgs>
   dispositionsvorschlaege?: boolean | Prisma.Artikel$dispositionsvorschlaegeArgs<ExtArgs>
   _count?: boolean | Prisma.ArtikelCountOutputTypeDefaultArgs<ExtArgs>
@@ -2417,6 +2845,8 @@ export type $ArtikelPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     pruefauftraege: Prisma.$PruefauftragPayload<ExtArgs>[]
     sperrbestaende: Prisma.$SperrbestandPayload<ExtArgs>[]
     konfektionsauftraege: Prisma.$KonfektionsauftragPayload<ExtArgs>[]
+    konfektionaerBestaende: Prisma.$KonfektionaerBestandPayload<ExtArgs>[]
+    konfektionaerSendungen: Prisma.$KonfektionaerSendungPayload<ExtArgs>[]
     logistikpositionen: Prisma.$LogistikpositionPayload<ExtArgs>[]
     dispositionsvorschlaege: Prisma.$DispositionsvorschlagPayload<ExtArgs>[]
   }
@@ -2842,6 +3272,8 @@ export interface Prisma__ArtikelClient<T, Null = never, ExtArgs extends runtime.
   pruefauftraege<T extends Prisma.Artikel$pruefauftraegeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$pruefauftraegeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PruefauftragPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sperrbestaende<T extends Prisma.Artikel$sperrbestaendeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$sperrbestaendeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SperrbestandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   konfektionsauftraege<T extends Prisma.Artikel$konfektionsauftraegeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$konfektionsauftraegeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KonfektionsauftragPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  konfektionaerBestaende<T extends Prisma.Artikel$konfektionaerBestaendeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$konfektionaerBestaendeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KonfektionaerBestandPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  konfektionaerSendungen<T extends Prisma.Artikel$konfektionaerSendungenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$konfektionaerSendungenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$KonfektionaerSendungPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   logistikpositionen<T extends Prisma.Artikel$logistikpositionenArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$logistikpositionenArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LogistikpositionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   dispositionsvorschlaege<T extends Prisma.Artikel$dispositionsvorschlaegeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Artikel$dispositionsvorschlaegeArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DispositionsvorschlagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3449,6 +3881,54 @@ export type Artikel$konfektionsauftraegeArgs<ExtArgs extends runtime.Types.Exten
   take?: number
   skip?: number
   distinct?: Prisma.KonfektionsauftragScalarFieldEnum | Prisma.KonfektionsauftragScalarFieldEnum[]
+}
+
+/**
+ * Artikel.konfektionaerBestaende
+ */
+export type Artikel$konfektionaerBestaendeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KonfektionaerBestand
+   */
+  select?: Prisma.KonfektionaerBestandSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KonfektionaerBestand
+   */
+  omit?: Prisma.KonfektionaerBestandOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KonfektionaerBestandInclude<ExtArgs> | null
+  where?: Prisma.KonfektionaerBestandWhereInput
+  orderBy?: Prisma.KonfektionaerBestandOrderByWithRelationInput | Prisma.KonfektionaerBestandOrderByWithRelationInput[]
+  cursor?: Prisma.KonfektionaerBestandWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KonfektionaerBestandScalarFieldEnum | Prisma.KonfektionaerBestandScalarFieldEnum[]
+}
+
+/**
+ * Artikel.konfektionaerSendungen
+ */
+export type Artikel$konfektionaerSendungenArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the KonfektionaerSendung
+   */
+  select?: Prisma.KonfektionaerSendungSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the KonfektionaerSendung
+   */
+  omit?: Prisma.KonfektionaerSendungOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.KonfektionaerSendungInclude<ExtArgs> | null
+  where?: Prisma.KonfektionaerSendungWhereInput
+  orderBy?: Prisma.KonfektionaerSendungOrderByWithRelationInput | Prisma.KonfektionaerSendungOrderByWithRelationInput[]
+  cursor?: Prisma.KonfektionaerSendungWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.KonfektionaerSendungScalarFieldEnum | Prisma.KonfektionaerSendungScalarFieldEnum[]
 }
 
 /**

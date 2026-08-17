@@ -409,6 +409,9 @@ export const ModelName = {
   Qualitaetsfreigabe: 'Qualitaetsfreigabe',
   Sperrbestand: 'Sperrbestand',
   Konfektionsauftrag: 'Konfektionsauftrag',
+  Konfektionaer: 'Konfektionaer',
+  KonfektionaerBestand: 'KonfektionaerBestand',
+  KonfektionaerSendung: 'KonfektionaerSendung',
   Logistikauftrag: 'Logistikauftrag',
   Logistikposition: 'Logistikposition',
   Kommissionierung: 'Kommissionierung',
@@ -458,7 +461,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "artikel" | "lagerplatz" | "lagerbestand" | "lagerbewegung" | "ladungstraeger" | "ladungstraegerPosition" | "inventurPosition" | "pruefauftrag" | "qualitaetspruefung" | "qualitaetsfreigabe" | "sperrbestand" | "konfektionsauftrag" | "logistikauftrag" | "logistikposition" | "kommissionierung" | "ladung" | "ladungsauftrag" | "versand" | "desadv" | "lieferschein" | "rollenprofil" | "benutzer" | "mitarbeiterAufgabe" | "mitarbeiterschicht" | "digitalerArbeitsauftrag" | "interneBenachrichtigung" | "organisationTermin" | "organisationRessource" | "ressourcenReservierung" | "hintergrundauftrag" | "novaMail" | "kommunikationsKanal" | "kommunikationsNachricht" | "benutzerSitzung" | "systemeinstellung" | "systemprotokoll" | "bestellung" | "telefonat" | "abwesenheit" | "zeitbuchung" | "kunde" | "angebot" | "dispositionsvorschlag" | "rechnung" | "zahlung" | "cadDokument"
+    modelProps: "artikel" | "lagerplatz" | "lagerbestand" | "lagerbewegung" | "ladungstraeger" | "ladungstraegerPosition" | "inventurPosition" | "pruefauftrag" | "qualitaetspruefung" | "qualitaetsfreigabe" | "sperrbestand" | "konfektionsauftrag" | "konfektionaer" | "konfektionaerBestand" | "konfektionaerSendung" | "logistikauftrag" | "logistikposition" | "kommissionierung" | "ladung" | "ladungsauftrag" | "versand" | "desadv" | "lieferschein" | "rollenprofil" | "benutzer" | "mitarbeiterAufgabe" | "mitarbeiterschicht" | "digitalerArbeitsauftrag" | "interneBenachrichtigung" | "organisationTermin" | "organisationRessource" | "ressourcenReservierung" | "hintergrundauftrag" | "novaMail" | "kommunikationsKanal" | "kommunikationsNachricht" | "benutzerSitzung" | "systemeinstellung" | "systemprotokoll" | "bestellung" | "telefonat" | "abwesenheit" | "zeitbuchung" | "kunde" | "angebot" | "dispositionsvorschlag" | "rechnung" | "zahlung" | "cadDokument"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1347,6 +1350,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.KonfektionsauftragCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.KonfektionsauftragCountAggregateOutputType> | number
+        }
+      }
+    }
+    Konfektionaer: {
+      payload: Prisma.$KonfektionaerPayload<ExtArgs>
+      fields: Prisma.KonfektionaerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KonfektionaerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KonfektionaerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        findFirst: {
+          args: Prisma.KonfektionaerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KonfektionaerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        findMany: {
+          args: Prisma.KonfektionaerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>[]
+        }
+        create: {
+          args: Prisma.KonfektionaerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        createMany: {
+          args: Prisma.KonfektionaerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KonfektionaerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>[]
+        }
+        delete: {
+          args: Prisma.KonfektionaerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        update: {
+          args: Prisma.KonfektionaerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        deleteMany: {
+          args: Prisma.KonfektionaerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KonfektionaerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KonfektionaerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>[]
+        }
+        upsert: {
+          args: Prisma.KonfektionaerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerPayload>
+        }
+        aggregate: {
+          args: Prisma.KonfektionaerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKonfektionaer>
+        }
+        groupBy: {
+          args: Prisma.KonfektionaerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KonfektionaerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerCountAggregateOutputType> | number
+        }
+      }
+    }
+    KonfektionaerBestand: {
+      payload: Prisma.$KonfektionaerBestandPayload<ExtArgs>
+      fields: Prisma.KonfektionaerBestandFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KonfektionaerBestandFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KonfektionaerBestandFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        findFirst: {
+          args: Prisma.KonfektionaerBestandFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KonfektionaerBestandFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        findMany: {
+          args: Prisma.KonfektionaerBestandFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>[]
+        }
+        create: {
+          args: Prisma.KonfektionaerBestandCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        createMany: {
+          args: Prisma.KonfektionaerBestandCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KonfektionaerBestandCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>[]
+        }
+        delete: {
+          args: Prisma.KonfektionaerBestandDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        update: {
+          args: Prisma.KonfektionaerBestandUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        deleteMany: {
+          args: Prisma.KonfektionaerBestandDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KonfektionaerBestandUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KonfektionaerBestandUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>[]
+        }
+        upsert: {
+          args: Prisma.KonfektionaerBestandUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerBestandPayload>
+        }
+        aggregate: {
+          args: Prisma.KonfektionaerBestandAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKonfektionaerBestand>
+        }
+        groupBy: {
+          args: Prisma.KonfektionaerBestandGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerBestandGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KonfektionaerBestandCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerBestandCountAggregateOutputType> | number
+        }
+      }
+    }
+    KonfektionaerSendung: {
+      payload: Prisma.$KonfektionaerSendungPayload<ExtArgs>
+      fields: Prisma.KonfektionaerSendungFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.KonfektionaerSendungFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.KonfektionaerSendungFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        findFirst: {
+          args: Prisma.KonfektionaerSendungFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.KonfektionaerSendungFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        findMany: {
+          args: Prisma.KonfektionaerSendungFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>[]
+        }
+        create: {
+          args: Prisma.KonfektionaerSendungCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        createMany: {
+          args: Prisma.KonfektionaerSendungCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.KonfektionaerSendungCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>[]
+        }
+        delete: {
+          args: Prisma.KonfektionaerSendungDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        update: {
+          args: Prisma.KonfektionaerSendungUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        deleteMany: {
+          args: Prisma.KonfektionaerSendungDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.KonfektionaerSendungUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.KonfektionaerSendungUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>[]
+        }
+        upsert: {
+          args: Prisma.KonfektionaerSendungUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$KonfektionaerSendungPayload>
+        }
+        aggregate: {
+          args: Prisma.KonfektionaerSendungAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateKonfektionaerSendung>
+        }
+        groupBy: {
+          args: Prisma.KonfektionaerSendungGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerSendungGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.KonfektionaerSendungCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.KonfektionaerSendungCountAggregateOutputType> | number
         }
       }
     }
@@ -4099,6 +4324,54 @@ export const KonfektionsauftragScalarFieldEnum = {
 export type KonfektionsauftragScalarFieldEnum = (typeof KonfektionsauftragScalarFieldEnum)[keyof typeof KonfektionsauftragScalarFieldEnum]
 
 
+export const KonfektionaerScalarFieldEnum = {
+  id: 'id',
+  nummer: 'nummer',
+  name: 'name',
+  ansprechpartner: 'ansprechpartner',
+  email: 'email',
+  telefon: 'telefon',
+  adresse: 'adresse',
+  aktiv: 'aktiv',
+  erstelltAm: 'erstelltAm',
+  aktualisiertAm: 'aktualisiertAm'
+} as const
+
+export type KonfektionaerScalarFieldEnum = (typeof KonfektionaerScalarFieldEnum)[keyof typeof KonfektionaerScalarFieldEnum]
+
+
+export const KonfektionaerBestandScalarFieldEnum = {
+  id: 'id',
+  konfektionaerId: 'konfektionaerId',
+  artikelId: 'artikelId',
+  menge: 'menge',
+  aktualisiertAm: 'aktualisiertAm'
+} as const
+
+export type KonfektionaerBestandScalarFieldEnum = (typeof KonfektionaerBestandScalarFieldEnum)[keyof typeof KonfektionaerBestandScalarFieldEnum]
+
+
+export const KonfektionaerSendungScalarFieldEnum = {
+  id: 'id',
+  sendungsnummer: 'sendungsnummer',
+  konfektionaerId: 'konfektionaerId',
+  artikelId: 'artikelId',
+  menge: 'menge',
+  status: 'status',
+  freigegebenVon: 'freigegebenVon',
+  freigegebenAm: 'freigegebenAm',
+  versandtVon: 'versandtVon',
+  versandtAm: 'versandtAm',
+  rueckmeldeMenge: 'rueckmeldeMenge',
+  ausschussMenge: 'ausschussMenge',
+  notiz: 'notiz',
+  erstelltAm: 'erstelltAm',
+  abgeschlossenAm: 'abgeschlossenAm'
+} as const
+
+export type KonfektionaerSendungScalarFieldEnum = (typeof KonfektionaerSendungScalarFieldEnum)[keyof typeof KonfektionaerSendungScalarFieldEnum]
+
+
 export const LogistikauftragScalarFieldEnum = {
   id: 'id',
   auftragsnummer: 'auftragsnummer',
@@ -4863,6 +5136,9 @@ export type GlobalOmitConfig = {
   qualitaetsfreigabe?: Prisma.QualitaetsfreigabeOmit
   sperrbestand?: Prisma.SperrbestandOmit
   konfektionsauftrag?: Prisma.KonfektionsauftragOmit
+  konfektionaer?: Prisma.KonfektionaerOmit
+  konfektionaerBestand?: Prisma.KonfektionaerBestandOmit
+  konfektionaerSendung?: Prisma.KonfektionaerSendungOmit
   logistikauftrag?: Prisma.LogistikauftragOmit
   logistikposition?: Prisma.LogistikpositionOmit
   kommissionierung?: Prisma.KommissionierungOmit

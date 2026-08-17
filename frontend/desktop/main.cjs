@@ -32,6 +32,20 @@ function produktnamenBereinigen(datenbankPfad) {
   }
 }
 
+function konfektionaereSchemaSicherstellen(datenbankPfad) {
+  const ergebnis = spawnSync(
+    path.join(process.resourcesPath, "node.exe"),
+    [path.join(app.getAppPath(), "desktop", "ensure-konfektionaere-schema.cjs"), datenbankPfad],
+    {
+      windowsHide: true,
+      env: { ...process.env, NODE_PATH: path.join(app.getAppPath(), "node_modules") },
+    },
+  );
+  if (ergebnis.status !== 0) {
+    throw new Error(`Konfektionärsstruktur konnte nicht eingerichtet werden: ${ergebnis.stderr?.toString() ?? "Unbekannter Fehler"}`);
+  }
+}
+
 function neuerungenLesen(releaseNotes) {
   const text = Array.isArray(releaseNotes)
     ? releaseNotes.map((eintrag) => eintrag?.note || "").join("\n")
@@ -156,6 +170,7 @@ async function paketServerStarten() {
       datenbank,
     );
   }
+  konfektionaereSchemaSicherstellen(datenbank);
   produktnamenBereinigen(datenbank);
   const protokoll = fs.openSync(
     path.join(app.getPath("userData"), "nova-server.log"),
